@@ -156,11 +156,14 @@ body {
   align-items: center;
   padding: 0 10px;
   flex-shrink: 0;
-  cursor: move;
   /* Aqua pinstripes */
   background-color: #f5f5f5; /* 더 밝은 기본 색상 */
   background-image: repeating-linear-gradient(180deg, transparent, transparent 1px, rgba(0,0,0,0.03) 1px, rgba(0,0,0,0.03) 2px);
   border-bottom: 1px solid #a9a9a9; /* 테두리 색상 조정 */
+
+  /* ▼▼▼ 이 아래 두 줄을 새로 추가! ▼▼▼ */
+  position: relative; /* z-index를 적용하기 위해 필요합니다 */
+  z-index: 5;         /* 헤더의 z-index를 5로 설정 */
 }
 
 .window-controls {
@@ -246,7 +249,8 @@ body {
   border-color: #3a68b5;
 }
 
-.blog-content { padding: 20px; line-height: 1.6; height: 100%; overflow-y: auto; }
+.blog-content { padding: 20px; line-height: 1.6; height: 100%; overflow-y: auto;  box-sizing: border-box; /* 패딩이 높이에 영향을 주지 않도록 설정 */padding-bottom: 18px; /* 리사이즈 손잡이 높이만큼 안쪽 여백 추가 */ }
+
 .blog-post.active { display: block; }
 .blog-post h2 { margin-bottom: 10px; font-size: 22px; }
 .blog-post-meta { color: #666; font-size: 12px; margin-bottom: 15px; }
@@ -268,10 +272,8 @@ body {
 
 .safari-toolbar,
 .folder-toolbar {
-    background: #ededed; /* 핀스트라이프 헤더와 어울리는 밝은 회색 */
-    border-bottom: 1px solid #b0b0b0; /* 하단 경계선 */
-
-    /* 아래는 기존의 다른 스타일들입니다. */
+    background: #ededed;
+    border-bottom: 1px solid #b0b0b0;
     padding: 5px 12px;
     display: flex;
     align-items: center;
@@ -279,11 +281,13 @@ body {
 }
 
 
+
 /* Folder Window */
 .folder-window { width: 70vw; height: 60vh; top: 15%; left: 15%; }
 .folder-back-btn { opacity: 0.5; cursor: not-allowed; }
 .folder-back-btn.active { opacity: 1; cursor: pointer; }
-.folder-content { padding: 20px; display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 20px; overflow-y: auto; height: 100%; }
+.folder-content { padding: 20px; display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 20px; overflow-y: auto; height: 100%;   box-sizing: border-box; /* 패딩이 높이에 영향을 주지 않도록 설정 */
+  padding-bottom: 18px; /* 리사이즈 손잡이 높이만큼 안쪽 여백 추가 */}
 .folder-item { text-align: center; cursor: pointer; }
 .folder-item-icon { width: 48px; height: 48px; margin: 0 auto 5px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 24px; transition: transform 0.2s ease; background: #fff; border: 1px solid #ccc; }
 .folder-item:hover .folder-item-icon { transform: scale(1.1); }
@@ -361,33 +365,6 @@ body {
 .blog-content, .text-editor, .folder-item-name, .icon-label { user-select: text; }
 
 
-/* style.css에 추가 */
-
-/* 스크롤바 전체 */
-::-webkit-scrollbar {
-  width: 15px;
-  height: 15px;
-}
-
-/* 스크롤바 트랙 (배경) */
-::-webkit-scrollbar-track {
-  background-color: #f0f0f0;
-  border-left: 1px solid #b0b0b0;
-}
-
-/* 스크롤바 핸들 (움직이는 막대) */
-::-webkit-scrollbar-thumb {
-  background-color: #5894f6;
-  border-radius: 10px;
-  border: 1px solid #3367d6;
-  background-image: linear-gradient(to right, #82b0ff, #5894f6);
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background-color: #4a80ff;
-}
-/* style.css 에 새로 추가 */
-
 /* 알약 모양 툴바 버튼 기본 스타일 */
 .toolbar-button {
     background: linear-gradient(to bottom, #fefefe, #f2f2f2);
@@ -437,4 +414,25 @@ body {
     height: 45px;
     background-color: rgba(0, 0, 0, 0.2);
     margin: 0 5px;
+}
+
+
+/* style.css 파일 맨 아래에 추가 */
+
+.resize-grip {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  /* 1. 크기를 스크롤바와 비슷하게 조정 (18px -> 16px) */
+  width: 15px;
+  height: 15px;
+  cursor: nwse-resize;
+  z-index: 10;
+
+  /* 2. 배경과 자연스럽게 어우러지도록 반투명 배경과 미세한 테두리로 변경 */
+  background-color: rgba(0, 0, 0, 0.1);
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+  border-left: 1px solid rgba(255, 255, 255, 0.2);
+  
+  /* 기존의 빗금무늬 background-image는 삭제합니다. */
 }

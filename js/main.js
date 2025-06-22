@@ -5,34 +5,45 @@ let zIndexCounter = 100;
 let folderHistory = ['desktop'];
 let allPosts = []; // 기존 posts 객체를 빈 배열로 대체
 let safariState = { lastCategory: null, lastScrollPosition: 0 }; // 이 줄을 새로 추가!
+let isDragging = false;
+let isResizing = false; // 리사이징 상태 변수 추가
+let currentWindow = null;
+let dragOffsetX, dragOffsetY;
+let initialWidth, initialHeight, initialMouseX, initialMouseY; // 리사이징을 위한 변수들 추가
+let resizeDirection = ''; // 리사이징 방향을 저장할 변수 추가
+
 // js/main.js
 
-// --- 초기화 함수 ---
-async function initializeApp() {
+// --- 앱 초기화 ---
+// main.js 파일의 document.addEventListener('DOMContentLoaded', ...) 안쪽을 수정합니다.
+
+document.addEventListener('DOMContentLoaded', async () => {
     try {
         const response = await fetch('./posts.json');
         const data = await response.json();
-        allPosts = data.posts.sort((a,b) => new Date(b.date) - new Date(a.date));
+        allPosts = data.posts.sort((a, b) => new Date(b.date) - new Date(a.date));
 
-        // 앱 초기화
         updateTime();
         setInterval(updateTime, 10000);
-        // 바탕화면 아이콘 설정 등 기존 초기화 코드...
-        document.querySelectorAll('.desktop-icon').forEach(icon => {
-             icon.addEventListener('dblclick', () => {
-                const classList = icon.classList;
-                if(classList.contains('folder-icon')) {
-                     const category = icon.textContent.includes('Tech') ? 'tech' : 'life';
-                     openFolder(category);
-                }
-             });
+
+        // ▼▼▼ 각 창에 마우스 리스너를 추가하는 코드를 다시 추가(복구)합니다. ▼▼▼
+        document.querySelectorAll('.window').forEach(win => {
+            win.addEventListener('mousemove', handleWindowMouseMove);
+            win.addEventListener('mouseleave', handleWindowMouseLeave);
         });
 
+        document.addEventListener('mousedown', onInteractionStart);
+        // ▼▼▼ 이벤트 핸들러를 다시 'onInteractionMove'로 변경합니다. ▼▼▼
+        document.addEventListener('mousemove', onInteractionMove);
+        document.addEventListener('touchmove', onInteractionMove, { passive: false });
+        // ▲▲▲ 위 2줄을 변경합니다. ▲▲▲
+        document.addEventListener('mouseup', onInteractionEnd);
+        
     } catch (error) {
         console.error("블로그 글 목록을 불러오는 데 실패했습니다:", error);
         showNotification("Error: Could not load blog posts.");
     }
-}
+});
 
 
 // --- Safari (Blog) Logic 수정 ---
@@ -63,6 +74,13 @@ async function showPost(postId) {
         console.error("포스트를 불러오는 데 실패했습니다:", error);
         showNotification("Error: Could not load the post.");
     }
+}
+
+function safariGoBack() {
+    showHome(safariState.lastCategory);
+    setTimeout(() => {
+        document.getElementById('blog-content').scrollTop = safariState.lastScrollPosition;
+    }, 0);
 }
 
 function updatePostList(filterCategory = null) {
@@ -160,13 +178,6 @@ function savePost() {
     showNotification(`'${fileName}'이 다운로드되었습니다. 서버의 posts 폴더에 업로드하고 posts.json을 업데이트해주세요.`);
     editor.value = '';
 }
-
-// --- 최종 초기화 ---
-// DOMContentLoaded 이벤트 리스너에서 initializeApp()을 호출합니다.
-document.addEventListener('DOMContentLoaded', initializeApp);
-
-// (기존의 다른 함수들: openWindow, closeWindow, drag-and-drop 로직 등은 대부분 그대로 사용 가능합니다)
-// js/main.js 파일 맨 아래에 이어서 붙여넣기
 
 // --- Window Management ---
 function bringToFront(windowId) {
@@ -319,67 +330,82 @@ function updateTime() {
 }
 
 // --- Event Listeners for Dragging ---
-let isDragging = false;
-let currentWindow = null;
-let dragOffsetX, dragOffsetY;
-
-function onDragStart(e) {
+function onInteractionStart(e) {
     const target = e.target;
+    currentWindow = target.closest('.window');
+    if (!currentWindow || !currentWindow.classList.contains('active')) return;
+
     const event = e.touches ? e.touches[0] : e;
+    bringToFront(currentWindow.id);
 
-    if (target.classList.contains('window-header') || target.closest('.window-header')) {
-        currentWindow = target.closest('.window');
-        if (!currentWindow) return;
-
-        bringToFront(currentWindow.id);
-        isDragging = true;
+    // 리사이즈 시작 지점을 감지하는 로직을 완전히 변경합니다.
+    if (target.classList.contains('resize-grip')) {
+        isResizing = true;
+        resizeDirection = 'se'; // 리사이즈 방향은 항상 남동(se)입니다.
         
+        const rect = currentWindow.getBoundingClientRect();
+        initialWidth = rect.width;
+        initialHeight = rect.height;
+        initialMouseX = event.clientX;
+        initialMouseY = event.clientY;
+        e.preventDefault();
+        
+    } else if (target.closest('.window-header')) {
+        isDragging = true;
         const rect = currentWindow.getBoundingClientRect();
         dragOffsetX = event.clientX - rect.left;
         dragOffsetY = event.clientY - rect.top;
-        
-        currentWindow.style.transition = 'none';
     }
+    currentWindow.style.transition = 'none';
 }
 
-function onDrag(e) {
-    if (isDragging && currentWindow) {
-        e.preventDefault();
-        const event = e.touches ? e.touches[0] : e;
 
+function onInteractionMove(e) {
+    const event = e.touches ? e.touches[0] : e;
+    if (isResizing && currentWindow) {
+        const dx = event.clientX - initialMouseX;
+        const dy = event.clientY - initialMouseY;
+        
+        // 남동(se) 방향 리사이즈 로직만 남깁니다.
+        const newWidth = Math.max(320, initialWidth + dx);
+        const newHeight = Math.max(200, initialHeight + dy);
+
+        currentWindow.style.width = newWidth + 'px';
+        currentWindow.style.height = newHeight + 'px';
+        e.preventDefault();
+
+    } else if (isDragging && currentWindow) {
         let newLeft = event.clientX - dragOffsetX;
         let newTop = event.clientY - dragOffsetY;
-        
-        const minTop = 23;
-        newTop = Math.max(minTop, newTop);
-        
+        newTop = Math.max(23, newTop);
         currentWindow.style.left = `${newLeft}px`;
         currentWindow.style.top = `${newTop}px`;
+        e.preventDefault();
     }
 }
 
-function onDragEnd() {
-    if (currentWindow) {
-        currentWindow.style.transition = '';
-    }
+function onInteractionEnd() {
+    if (currentWindow) currentWindow.style.transition = '';
     isDragging = false;
+    isResizing = false;
     currentWindow = null;
 }
 
-document.addEventListener('mousedown', onDragStart);
-document.addEventListener('mousemove', onDrag);
-document.addEventListener('mouseup', onDragEnd);
-document.addEventListener('touchstart', onDragStart, { passive: false });
-document.addEventListener('touchmove', onDrag, { passive: false });
-document.addEventListener('touchend', onDragEnd);
+function handleWindowMouseMove(e) {
+    if (isDragging || isResizing) return;
+    const windowEl = e.currentTarget;
+    if (!windowEl.classList.contains('active')) return;
 
-function safariGoBack() {
-    // 1. 저장해둔 마지막 카테고리로 글 목록을 다시 보여줍니다.
-    showHome(safariState.lastCategory);
+    // 가장자리 리사이즈 커서 로직을 삭제하고, 헤더의 'move' 커서만 남깁니다.
+    if (e.target.closest('.window-header')) {
+        windowEl.style.cursor = 'move';
+    } else if (windowEl.style.cursor === 'move') {
+        // 헤더 밖으로 나가면 기본 커서로 변경합니다.
+        windowEl.style.cursor = 'default';
+    }
+}
 
-    // 2. DOM이 업데이트된 후, 저장된 스크롤 위치로 이동시킵니다.
-    // setTimeout을 사용해 스크롤 위치 복원을 다음 렌더링 사이클로 넘겨 안정성을 높입니다.
-    setTimeout(() => {
-        document.getElementById('blog-content').scrollTop = safariState.lastScrollPosition;
-    }, 0);
+
+function handleWindowMouseLeave(e) {
+    e.currentTarget.style.cursor = 'default';
 }
