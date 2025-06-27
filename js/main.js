@@ -1,13 +1,11 @@
-// js/main.js
-
 // --- State Management ---
 let homeState = {
     category: 'all',
     sort: 'newest',
     page: 1,
 };
-let safariHistory = []; // Add this new line
-let blogCategories = new Map(); // Add this new line
+let safariHistory = []; 
+let blogCategories = new Map(); 
 let zIndexCounter = 100;
 let folderHistory = ['desktop'];
 let allPosts = [];
@@ -61,7 +59,39 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 });
 
+// --- Desktop Icons and Bookmarks ---
+function generateDesktopIcons() {
+    const container = document.getElementById('desktop-icons');
+    if (!container) return;
+    
+    let topPos = 30;
+    blogCategories.forEach((props, category) => {
+        const iconEl = document.createElement('div');
+        iconEl.className = 'desktop-icon folder-icon';
+        iconEl.style.top = `${topPos}px`;
+        iconEl.style.left = '30px'; // Or dynamically position them
+        iconEl.setAttribute('ondblclick', `openFolder('${category}')`);
+        iconEl.innerHTML = `
+            <div class="icon-image">📁</div>
+            <div class="icon-label">${props.title}</div>
+        `;
+        container.appendChild(iconEl);
+        topPos += 100; // Stagger them vertically
+    });
+}
 
+function generateBookmarkItems() {
+    const container = document.getElementById('bookmark-bar');
+    if (!container) return;
+
+    blogCategories.forEach((props, category) => {
+        const itemEl = document.createElement('div');
+        itemEl.className = 'bookmark-item';
+        itemEl.setAttribute('onclick', `showCategory('${category}')`);
+        itemEl.textContent = props.title.replace(' Blog', ''); // e.g., "Tech"
+        container.appendChild(itemEl);
+    });
+}
 
 // --- Safari (Blog) Logic ---
 async function showPost(postId) {
@@ -238,6 +268,22 @@ function openWindow(windowId) {
     if (dockIcon) dockIcon.classList.add('running');
 }
 
+function navigateToPost(postId) {
+    // Avoid adding duplicate entries if the user re-clicks the same link
+    if (safariHistory[safariHistory.length - 1] !== postId) {
+        safariHistory.push(postId);
+    }
+    updateSafariBackButton();
+    showPost(postId);
+}
+
+
+function updateSafariBackButton() {
+    const backBtn = document.getElementById('safari-back-btn');
+    // The button is disabled if there are 1 or 0 items in history (nowhere to go back to)
+    backBtn.disabled = safariHistory.length <= 1;
+}
+
 const openSafari = (postId = null) => {
     openWindow('safari-window'); // This makes the Safari window visible and brings it to the front
     if (postId) {
@@ -349,6 +395,72 @@ function showCategory(category, fromHistory = false) {
     });
 }
 
+
+function renderHomepage() {
+    // 1. Filter posts based on the current category from homeState
+    const filteredPosts = homeState.category === 'all'
+        ? [...allPosts]
+        : allPosts.filter(p => p.category === homeState.category);
+
+    // 2. Sort the filtered posts based on homeState
+    filteredPosts.sort((a, b) => {
+        const dateA = new Date(a.date);
+        const dateB = new Date(b.date);
+        return homeState.sort === 'newest' ? dateB - dateA : dateA - dateB;
+    });
+
+    // 3. Paginate the results
+    const postsPerPage = 5;
+    const totalPages = Math.ceil(filteredPosts.length / postsPerPage);
+    const startIndex = (homeState.page - 1) * postsPerPage;
+    const paginatedPosts = filteredPosts.slice(startIndex, startIndex + postsPerPage);
+
+    // 4. Render the list of posts
+    const postListEl = document.getElementById('post-list');
+    if (paginatedPosts.length > 0) {
+        postListEl.innerHTML = paginatedPosts.map(post => `
+            <div class="post-list-item" onclick="navigateToPost('${post.id}')">
+                <div class="post-list-title">${post.title}</div>
+                <div class="post-list-meta">${post.date} | ${getCategoryProps(post.category).title}</div>
+            </div>
+        `).join('');
+    } else {
+        postListEl.innerHTML = '<div style="text-align: center; color: #888; padding: 40px 0;">No posts found.</div>';
+    }
+
+    // 5. Render ONLY the sorting dropdown
+    const controlsEl = document.getElementById('blog-controls');
+    controlsEl.innerHTML = `
+        <select class="sort-select" onchange="changeSortAndRender(this.value)">
+            <option value="newest" ${homeState.sort === 'newest' ? 'selected' : ''}>Sort by Newest</option>
+            <option value="oldest" ${homeState.sort === 'oldest' ? 'selected' : ''}>Sort by Oldest</option>
+        </select>
+    `;
+
+    // 6. Render the numeric pagination
+    const paginationEl = document.getElementById('pagination-container');
+    if (totalPages > 1) {
+        let paginationHTML = '';
+        for (let i = 1; i <= totalPages; i++) {
+            paginationHTML += `<div class="pagination-link ${homeState.page === i ? 'active' : ''}" onclick="changePageAndRender(${i})">${i}</div>`;
+        }
+        paginationEl.innerHTML = paginationHTML;
+    } else {
+        paginationEl.innerHTML = '';
+    }
+}
+
+function changeSortAndRender(sortOrder) {
+    homeState.sort = sortOrder;
+    homeState.page = 1; // Reset to first page when sorting changes
+    renderHomepage();
+}
+
+function changePageAndRender(pageNumber) {
+    homeState.page = pageNumber;
+    renderHomepage();
+}
+
 function showHome(fromHistory = false) {
     document.getElementById('safari-title').textContent = 'My Blog';
     document.querySelectorAll('.blog-post').forEach(el => el.remove());
@@ -392,7 +504,6 @@ function updateTime() {
 
 /// --- Event Listeners for Dragging/Resizing ---
 
-// This function now correctly sets the active window before any other logic.
 function onInteractionStart(e) {
     if (window.innerWidth <= 768) return;
 
@@ -477,13 +588,7 @@ function onInteractionEnd() {
     // Do not reset currentWindow to null here, it's needed for other interactions.
 }
 
-// These two functions are no longer needed and have been removed 
-// to prevent conflicts. The logic is handled by the main listeners.
-// handleWindowMouseMove() - REMOVED
-// handleWindowMouseLeave() - REMOVED
-
 // for related posts
-// REPLACE the old generatePostListHTML function with this one
 function generatePostListHTML(category, currentPostId, page = 1) {
     const relatedPosts = allPosts.filter(p => p.category === category && p.id !== currentPostId);
     const postsPerPage = 5;
@@ -542,7 +647,6 @@ function renderRelatedPosts(activeCategory, currentPostId) {
     `;
 }
 
-// ADD this new function to main.js
 function updateRelatedPosts(newCategory, currentPostId, page = 1) {
     const newContentHtml = generatePostListHTML(newCategory, currentPostId, page);
     
@@ -553,123 +657,5 @@ function updateRelatedPosts(newCategory, currentPostId, page = 1) {
     
     document.querySelectorAll('.related-tab').forEach(tab => {
         tab.classList.toggle('active', tab.textContent === getCategoryProps(newCategory).title);
-    });
-}
-
-function renderHomepage() {
-    // 1. Filter posts based on the current category from homeState
-    const filteredPosts = homeState.category === 'all'
-        ? [...allPosts]
-        : allPosts.filter(p => p.category === homeState.category);
-
-    // 2. Sort the filtered posts based on homeState
-    filteredPosts.sort((a, b) => {
-        const dateA = new Date(a.date);
-        const dateB = new Date(b.date);
-        return homeState.sort === 'newest' ? dateB - dateA : dateA - dateB;
-    });
-
-    // 3. Paginate the results
-    const postsPerPage = 5;
-    const totalPages = Math.ceil(filteredPosts.length / postsPerPage);
-    const startIndex = (homeState.page - 1) * postsPerPage;
-    const paginatedPosts = filteredPosts.slice(startIndex, startIndex + postsPerPage);
-
-    // 4. Render the list of posts
-    const postListEl = document.getElementById('post-list');
-    if (paginatedPosts.length > 0) {
-        postListEl.innerHTML = paginatedPosts.map(post => `
-            <div class="post-list-item" onclick="navigateToPost('${post.id}')">
-                <div class="post-list-title">${post.title}</div>
-                <div class="post-list-meta">${post.date} | ${getCategoryProps(post.category).title}</div>
-            </div>
-        `).join('');
-    } else {
-        postListEl.innerHTML = '<div style="text-align: center; color: #888; padding: 40px 0;">No posts found.</div>';
-    }
-
-    // 5. Render ONLY the sorting dropdown
-    const controlsEl = document.getElementById('blog-controls');
-    controlsEl.innerHTML = `
-        <select class="sort-select" onchange="changeSortAndRender(this.value)">
-            <option value="newest" ${homeState.sort === 'newest' ? 'selected' : ''}>Sort by Newest</option>
-            <option value="oldest" ${homeState.sort === 'oldest' ? 'selected' : ''}>Sort by Oldest</option>
-        </select>
-    `;
-
-    // 6. Render the numeric pagination
-    const paginationEl = document.getElementById('pagination-container');
-    if (totalPages > 1) {
-        let paginationHTML = '';
-        for (let i = 1; i <= totalPages; i++) {
-            paginationHTML += `<div class="pagination-link ${homeState.page === i ? 'active' : ''}" onclick="changePageAndRender(${i})">${i}</div>`;
-        }
-        paginationEl.innerHTML = paginationHTML;
-    } else {
-        paginationEl.innerHTML = '';
-    }
-}
-
-// ADD these two new, smaller helper functions
-function changeSortAndRender(sortOrder) {
-    homeState.sort = sortOrder;
-    homeState.page = 1; // Reset to first page when sorting changes
-    renderHomepage();
-}
-
-function changePageAndRender(pageNumber) {
-    homeState.page = pageNumber;
-    renderHomepage();
-}
-
-// ADD these two new functions to js/main.js
-
-function navigateToPost(postId) {
-    // Avoid adding duplicate entries if the user re-clicks the same link
-    if (safariHistory[safariHistory.length - 1] !== postId) {
-        safariHistory.push(postId);
-    }
-    updateSafariBackButton();
-    showPost(postId);
-}
-
-function updateSafariBackButton() {
-    const backBtn = document.getElementById('safari-back-btn');
-    // The button is disabled if there are 1 or 0 items in history (nowhere to go back to)
-    backBtn.disabled = safariHistory.length <= 1;
-}
-
-// ADD these two new functions to js/main.js
-
-function generateDesktopIcons() {
-    const container = document.getElementById('desktop-icons');
-    if (!container) return;
-    
-    let topPos = 30;
-    blogCategories.forEach((props, category) => {
-        const iconEl = document.createElement('div');
-        iconEl.className = 'desktop-icon folder-icon';
-        iconEl.style.top = `${topPos}px`;
-        iconEl.style.left = '30px'; // Or dynamically position them
-        iconEl.setAttribute('ondblclick', `openFolder('${category}')`);
-        iconEl.innerHTML = `
-            <div class="icon-image">📁</div>
-            <div class="icon-label">${props.title}</div>
-        `;
-        container.appendChild(iconEl);
-        topPos += 100; // Stagger them vertically
-    });
-}
-
-function generateBookmarkItems() {
-    const container = document.getElementById('bookmark-bar');
-    if (!container) return;
-
-    blogCategories.forEach((props, category) => {
-        const itemEl = document.createElement('div');
-        itemEl.className = 'bookmark-item';
-        itemEl.setAttribute('onclick', `showCategory('${category}')`);
-        itemEl.textContent = props.title.replace(' Blog', ''); // e.g., "Tech"
-        container.appendChild(itemEl);
     });
 }
