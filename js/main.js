@@ -45,7 +45,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         updateTime();
         setInterval(updateTime, 10000);
         
-        // ... (the rest of the function remains the same)
+        // Add event listeners for window dragging and resizing
+        document.addEventListener('mousedown', onInteractionStart);
+        document.addEventListener('mousemove', onInteractionMove);
+        document.addEventListener('mouseup', onInteractionEnd);
+        document.addEventListener('touchstart', onInteractionStart);
+        document.addEventListener('touchmove', onInteractionMove);
+        document.addEventListener('touchend', onInteractionEnd);
         
         showHome(); // Initial load
 
