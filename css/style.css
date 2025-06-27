@@ -320,7 +320,7 @@ body {
   border-radius: 20px;
   padding: 5px;
   display: flex;
-  align-items: flex-end;
+  align-items: center; /* Changed from flex-end to center */
   gap: 15px;
   z-index: 5000;
   box-shadow: 0 0 20px rgba(0,0,0,0.2);
