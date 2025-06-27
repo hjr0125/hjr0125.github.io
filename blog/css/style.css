@@ -1,0 +1,533 @@
+/* General Setup */
+ * {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Lucida Grande', 'Apple SD Gothic Neo', sans-serif;
+  background: #6a90c9;
+  background-image: url('https://placehold.co/1920x1080/6a90c9/6a90c9?text=+');
+  background-size: cover;
+  height: 100vh;
+  overflow: hidden;
+  user-select: none;
+  position: relative;
+}
+
+/* Top Menu Bar */
+.menu-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 23px;
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(15px);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 12px;
+  font-size: 13px;
+  z-index: 10000;
+  color: #333;
+}
+
+.menu-left {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.apple-logo {
+  width: 16px;
+  height: 16px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 23'%3E%3Cpath fill='%23333' d='M17.9,11.3c0-2.8,2.1-4.1,2.1-4.2c-1.3-1.8-3.3-2.1-4-2.1c-1.6,0-3.1,1-4,1s-2.6-1-4.1-1C6.2,5,4,5.3,2.7,6.9 C0,10,0,14.6,3.4,18.2c1.7,1.8,3.6,2.8,5.5,2.8c1.8,0,2.5-1.1,4.7-1.1s2.8,1.1,4.7,1.1c2,0,3.6-1.1,5.3-2.8 C18.7,17.2,19,15.2,19,15.2C19,15.2,17.9,14.4,17.9,11.3z M15,3.6c0.9-1.1,1.5-2.6,1.4-4c-1.4,0.1-2.9,0.9-3.8,2 c-0.8,1-1.6,2.5-1.4,3.9C12.6,5.5,14,4.7,15,3.6z'/%3E%3C/svg%3E");
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+.menu-left .app-name {
+  font-weight: bold;
+}
+
+.menu-time {
+  font-weight: normal;
+}
+
+/* Desktop Area and Icons */
+.desktop {
+  position: fixed;
+  top: 23px;
+  left: 0;
+  right: 0;
+  bottom: 80px;
+  padding: 20px;
+  overflow: hidden;
+}
+
+.desktop-icon {
+  position: absolute;
+  width: 80px;
+  text-align: center;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.desktop-icon:active {
+  opacity: 0.7;
+}
+
+.icon-image {
+  width: 60px;
+  height: 60px;
+  margin: 0 auto 5px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.15), inset 0 0 0 1px rgba(255,255,255,0.2);
+  transition: transform 0.2s ease;
+}
+
+.desktop-icon:hover .icon-image {
+  transform: scale(1.1);
+}
+
+.icon-label {
+  font-size: 12px;
+  color: white;
+  text-shadow: 1px 1px 3px rgba(0,0,0,0.7);
+  background: rgba(0,0,0,0.2);
+  padding: 2px 8px;
+  border-radius: 10px;
+  display: inline-block;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.folder-icon .icon-image {
+  background: linear-gradient(to bottom, #72a7ff, #4a80ff);
+  color: #e0edff;
+}
+
+.safari-icon .icon-image {
+  background: linear-gradient(to bottom, #fff, #eee);
+  color: #4a80ff;
+}
+
+.textedit-icon .icon-image {
+  background: linear-gradient(to bottom, #fff, #eee);
+  color: #555;
+}
+
+/* Window Styling */
+.window {
+  position: fixed;
+  background: #f0f0f0;
+  border-radius: 10px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35), 0 0 0 1px rgba(0,0,0,0.2);
+  display: none;
+  min-width: 320px;
+  min-height: 200px;
+  transition: transform 0.2s, opacity 0.2s;
+}
+
+.window.active {
+  display: flex;
+  flex-direction: column;
+}
+
+.window.minimized {
+  transform: scale(0) translateY(500px);
+  opacity: 0;
+}
+
+.window-header {
+  height: 28px;
+  border-radius: 10px 10px 0 0;
+  display: flex;
+  align-items: center;
+  padding: 0 10px;
+  flex-shrink: 0;
+  background-color: #f5f5f5;
+  background-image: repeating-linear-gradient(180deg, transparent, transparent 1px, rgba(0,0,0,0.03) 1px, rgba(0,0,0,0.03) 2px);
+  border-bottom: 1px solid #a9a9a9;
+  position: relative;
+  z-index: 5;
+}
+
+.window-controls {
+  display: flex;
+  gap: 8px;
+  margin-right: 10px;
+}
+
+.window-control {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 1px solid rgba(0,0,0,0.4);
+  cursor: pointer;
+  position: relative;
+  box-shadow: inset 0 1px 1px rgba(255,255,255,0.4), 0 1px 2px rgba(0,0,0,0.2);
+}
+
+.close-btn { 
+  background-image: radial-gradient(circle at 50% 30%, #ff8e87, #ff5e57);
+}
+.minimize-btn { 
+  background-image: radial-gradient(circle at 50% 30%, #ffdb5e, #ffbd2e);
+}
+.maximize-btn { 
+  background-image: radial-gradient(circle at 50% 30%, #57d96f, #27c93f);
+}
+
+.window-control::before {
+  content: "";
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  color: rgba(0,0,0,0.6);
+  font-weight: bold;
+  font-size: 12px;
+  line-height: 1;
+}
+.window:hover .window-control::before { opacity: 1; }
+.close-btn::before { content: "×"; }
+.minimize-btn::before { content: "−"; }
+.maximize-btn::before { content: "+"; }
+
+.window-title {
+  font-size: 13px;
+  font-weight: normal;
+  color: #333;
+  flex: 1;
+  text-align: center;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.window-body {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background-color: #fff;
+}
+
+/* Safari Window */
+.safari-window { width: 80vw; height: 75vh; top: 12%; left: 10%; }
+
+
+.bookmark-bar { flex: 1; }
+.bookmark-item {
+  padding: 3px 10px;
+  background: linear-gradient(to bottom, #f0f0f0, #dcdcdc);
+  border: 1px solid #999;
+  border-radius: 4px;
+  font-size: 12px;
+  cursor: pointer;
+  display: inline-block;
+  margin-right: 5px;
+}
+.bookmark-item.active {
+  background: linear-gradient(to bottom, #6b9cde, #4a80ff);
+  color: white;
+  border-color: #3a68b5;
+}
+
+.blog-content { 
+  padding: 20px; 
+  line-height: 1.6; 
+  height: 100%; 
+  overflow: scroll; /* auto -> scroll */
+  box-sizing: border-box;
+}
+
+.blog-post.active { display: block; }
+.blog-post h2 { margin-bottom: 10px; font-size: 22px; }
+.blog-post-meta { color: #666; font-size: 12px; margin-bottom: 15px; }
+.blog-post-content { white-space: pre-wrap; line-height: 1.7; font-size: 14px; }
+.blog-home { display: block; }
+.blog-home h1 { font-size: 28px; }
+.post-list-item { padding: 15px; margin: 10px 0; border-radius: 8px; border: 1px solid #ddd; cursor: pointer; transition: background 0.2s; }
+.post-list-item:hover { background: #f5f5f5; }
+.post-list-title { font-weight: bold; font-size: 16px; margin-bottom: 5px; }
+
+/* TextEdit Window */
+.textedit-window { width: 60vw; height: 60vh; top: 20%; left: 20%; }
+.textedit-window .window-body { background: #fff; padding: 0; }
+.textedit-content {
+  width: 100%;
+  height: 100%;
+  overflow: scroll; /* auto -> scroll */
+  background: #fff;
+}
+.text-editor {
+  width: 100%; height: 100%; border: none; outline: none; resize: none;
+  font-family: 'Menlo', 'Monaco', monospace; font-size: 13px;
+  padding: 15px; background: transparent; display: block;
+}
+
+.safari-toolbar,
+.folder-toolbar {
+    background: #ededed;
+    border-bottom: 1px solid #b0b0b0;
+    padding: 5px 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* Folder Window */
+.folder-window { width: 70vw; height: 60vh; top: 15%; left: 15%; }
+.folder-back-btn { opacity: 0.5; cursor: not-allowed; }
+.folder-back-btn.active { opacity: 1; cursor: pointer; }
+
+.folder-content { 
+  padding: 20px; 
+  display: grid; 
+  grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); 
+  gap: 20px; 
+  overflow: scroll; /* auto -> scroll */
+  height: 100%;   
+  box-sizing: border-box;
+}
+.folder-item { text-align: center; cursor: pointer; }
+.folder-item-icon { width: 48px; height: 48px; margin: 0 auto 5px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 24px; transition: transform 0.2s ease; background: #fff; border: 1px solid #ccc; }
+.folder-item:hover .folder-item-icon { transform: scale(1.1); }
+.folder-item-name { font-size: 11px; color: #333; }
+
+/* Dock */
+.dock {
+  position: fixed;
+  bottom: 5px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(255,255,255,0.25);
+  backdrop-filter: blur(20px);
+  border-top: 1px solid rgba(255,255,255,0.5);
+  border-radius: 20px;
+  padding: 5px;
+  display: flex;
+  align-items: flex-end;
+  gap: 15px;
+  z-index: 5000;
+  box-shadow: 0 0 20px rgba(0,0,0,0.2);
+  height: 70px;
+}
+
+.dock-icon {
+  width: 50px;
+  height: 50px;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  font-size: 28px;
+  position: relative;
+}
+
+.dock-icon-img {
+  width: 100%;
+  height: 100%;
+  border-radius: 12px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+}
+
+.dock-icon:hover {
+  transform: scale(1.4) translateY(-10px);
+}
+
+/* Custom Notification */
+.notification {
+  position: fixed;
+  top: -50px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0,0,0,0.7);
+  color: white;
+  padding: 10px 20px;
+  border-radius: 20px;
+  z-index: 20000;
+  transition: top 0.5s ease;
+  font-size: 13px;
+}
+.notification.show {
+  top: 40px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .desktop { bottom: 80px; }
+  .window { width: 95% !important; height: 85% !important; top: 8% !important; left: 2.5% !important; }
+  .dock { height: 60px; padding: 5px; gap: 10px; }
+  .dock-icon { width: 40px; height: 40px; }
+  .desktop-icon { position: static; display: inline-block; margin: 10px; }
+  .desktop { display: flex; flex-wrap: wrap; justify-content: flex-start; align-content: flex-start; }
+}
+
+/* Text selection */
+.blog-content, .text-editor, .folder-item-name, .icon-label { user-select: text; }
+
+
+/* 알약 모양 툴바 버튼 기본 스타일 */
+.toolbar-button {
+    background: linear-gradient(to bottom, #fefefe, #f2f2f2);
+    border: 1px solid #9c9c9c;
+    border-radius: 15px;
+    padding: 3px 15px;
+    font-size: 13px;
+    font-family: 'Lucida Grande', 'Apple SD Gothic Neo', sans-serif;
+    box-shadow: 0 1px 1px rgba(0,0,0,0.05);
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #333;
+}
+
+.toolbar-button:active {
+    background: linear-gradient(to bottom, #e8e8e8, #f0f0f0);
+    box-shadow: inset 0 1px 1px rgba(0,0,0,0.1);
+    border-color: #777;
+}
+
+.dock-icon::after {
+    content: '';
+    position: absolute;
+    bottom: -8px;
+    width: 0;
+    height: 0;
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-bottom: 5px solid black;
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+
+.dock-icon.running::after {
+    opacity: 1;
+}
+
+.dock-separator {
+    width: 1px;
+    height: 45px;
+    background-color: rgba(0, 0, 0, 0.2);
+    margin: 0 5px;
+}
+
+/* 리사이즈 핸들 스타일 */
+.resize-grip {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 16px; 
+  height: 16px;
+  cursor: nwse-resize;
+  z-index: 10;
+  background-color: #ededed;
+  border-left: 1px solid #b0b0b0;
+  border-top: 1px solid #b0b0b0;
+  background-image: repeating-linear-gradient(
+      135deg, 
+      #c1c1c1, 
+      #c1c1c1 1px, 
+      transparent 1px, 
+      transparent 3px
+  );
+}
+
+/* 스크롤바 스타일 */
+.blog-content::-webkit-scrollbar,
+.folder-content::-webkit-scrollbar,
+.textedit-content::-webkit-scrollbar {
+  width: 16px;
+  height: 16px;
+  background: transparent; /* 스크롤바 전체 배경은 투명하게 */
+
+}
+
+.blog-content::-webkit-scrollbar-track,
+.folder-content::-webkit-scrollbar-track,
+.textedit-content::-webkit-scrollbar-track {
+  background-color: #f1f1f1;
+  border: 1px solid #d0d0d0;
+  /* 안쪽 그림자 효과로 움푹 파인 느낌 주기 */
+  box-shadow: inset 0 0 4px rgba(0,0,0,0.15);
+}
+
+.blog-content::-webkit-scrollbar-thumb,
+.folder-content::-webkit-scrollbar-thumb,
+.textedit-content::-webkit-scrollbar-thumb {
+  background-color: #b8c6e2;
+  border-radius: 20px;
+  border: 1px solid #7c8ba9;
+  background-image: linear-gradient(to right, #d5e0f3, #b8c6e2 50%, #a1b3d6);
+  box-shadow: inset 0 0 0 1px #e8eef9;
+}
+
+.blog-content::-webkit-scrollbar-thumb:hover,
+.folder-content::-webkit-scrollbar-thumb:hover,
+.textedit-content::-webkit-scrollbar-thumb:hover {
+  background-color: #a1b3d6;
+}
+
+.blog-content::-webkit-scrollbar-button,
+.folder-content::-webkit-scrollbar-button,
+.textedit-content::-webkit-scrollbar-button {
+  display: block;
+  height: 15px;
+  width: 15px;
+  background-color: #f0f0f0;
+  border: 1px solid #a9a9a9;
+  background-repeat: no-repeat;
+  background-position: center;
+  box-shadow: inset 0 1px 1px rgba(255,255,255,0.7);
+}
+
+.blog-content::-webkit-scrollbar-button:active,
+.folder-content::-webkit-scrollbar-button:active,
+.textedit-content::-webkit-scrollbar-button:active {
+  background-image: linear-gradient(to bottom, #e0e0e0, #f0f0f0);
+  box-shadow: inset 0 1px 1px rgba(0,0,0,0.1);
+}
+
+.blog-content::-webkit-scrollbar-button:vertical:decrement,
+.folder-content::-webkit-scrollbar-button:vertical:decrement,
+.textedit-content::-webkit-scrollbar-button:vertical:decrement {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10'%3E%3Cpath d='M5 3 L2 7 L8 7 Z' fill='%23555'/%3E%3C/svg%3E");
+}
+
+.blog-content::-webkit-scrollbar-button:vertical:increment,
+.folder-content::-webkit-scrollbar-button:vertical:increment,
+.textedit-content::-webkit-scrollbar-button:vertical:increment {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10'%3E%3Cpath d='M5 7 L2 3 L8 3 Z' fill='%23555'/%3E%3C/svg%3E");
+}
+
+.blog-content::-webkit-scrollbar-button:horizontal:decrement,
+.folder-content::-webkit-scrollbar-button:horizontal:decrement,
+.textedit-content::-webkit-scrollbar-button:horizontal:decrement {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10'%3E%3Cpath d='M7 5 L3 2 L3 8 Z' fill='%23555'/%3E%3C/svg%3E");
+}
+
+.blog-content::-webkit-scrollbar-button:horizontal:increment,
+.folder-content::-webkit-scrollbar-button:horizontal:increment,
+.textedit-content::-webkit-scrollbar-button:horizontal:increment {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10'%3E%3Cpath d='M3 5 L7 2 L7 8 Z' fill='%23555'/%3E%3C/svg%3E");
+}
+
+.blog-content::-webkit-scrollbar-corner,
+.folder-content::-webkit-scrollbar-corner,
+.textedit-content::-webkit-scrollbar-corner {
+  background-color: transparent;
+}
