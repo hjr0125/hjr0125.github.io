@@ -55,23 +55,24 @@ async function showPost(postId) {
         document.getElementById('safari-title').textContent = post.title;
         document.getElementById('blog-home').style.display = 'none';
         
-        // Hide related posts container initially
-        document.getElementById('related-posts-container').style.display = 'none';
-
         document.querySelectorAll('.blog-post').forEach(el => el.remove());
         
         const postEl = document.createElement('div');
         postEl.className = 'blog-post active';
-        postEl.innerHTML = `
+
+        // Generate the HTML for the main article and the related posts
+        const articleHtml = `
             <h2>${post.title}</h2>
             <div class="blog-post-meta">${post.date} | ${getCategoryProps(post.category).title}</div>
             <div class="blog-post-content">${htmlContent}</div>
         `;
+        const relatedPostsHtml = renderRelatedPosts(post.category, post.id);
+
+        // Combine them and set the innerHTML
+        postEl.innerHTML = articleHtml + relatedPostsHtml;
+
         document.getElementById('blog-content').appendChild(postEl);
         document.getElementById('blog-content').scrollTop = 0;
-
-        // NEW: Render the related posts section
-        renderRelatedPosts(post.category, post.id);
 
     } catch (error) {
         console.error("포스트를 불러오는 데 실패했습니다:", error);
@@ -297,9 +298,6 @@ function showHome(filterCategory = null) {
     document.querySelectorAll('.blog-post').forEach(el => el.remove());
     document.getElementById('blog-home').style.display = 'block';
     
-    // NEW: Hide the related posts section on the home page
-    document.getElementById('related-posts-container').style.display = 'none';
-
     updatePostList(filterCategory);
 
     document.querySelectorAll('.bookmark-item').forEach(item => {
@@ -429,22 +427,37 @@ function generatePostListHTML(category, currentPostId) {
 }
 
 // Add related posts rendering
+// REPLACE the old renderRelatedPosts function with this one
 function renderRelatedPosts(activeCategory, currentPostId) {
-    const container = document.getElementById('related-posts-container');
-    if (!container) return;
-
-    const categories = ['tech', 'life']; // Define your blog categories here
+    const categories = ['tech', 'life'];
     const tabsHtml = categories.map(cat => {
         const catProps = getCategoryProps(cat);
-        return `<div class="related-tab ${cat === activeCategory ? 'active' : ''}" onclick="renderRelatedPosts('${cat}', '${currentPostId}')">${catProps.title}</div>`;
+        // Note: The onclick now passes the 'currentPostId' to keep track of the main article
+        return `<div class="related-tab ${cat === activeCategory ? 'active' : ''}" onclick="updateRelatedPosts('${cat}', '${currentPostId}')">${catProps.title}</div>`;
     }).join('');
 
     const postListHtml = generatePostListHTML(activeCategory, currentPostId);
 
-    container.innerHTML = `
-        <hr class="related-separator">
-        <div class="related-tabs">${tabsHtml}</div>
-        <div class="related-post-list">${postListHtml}</div>
+    // This function now returns the complete HTML for the section
+    return `
+        <div class="related-posts-section">
+            <hr class="related-separator">
+            <div class="related-tabs">${tabsHtml}</div>
+            <div class="related-post-list">${postListHtml}</div>
+        </div>
     `;
-    container.style.display = 'block';
+}
+
+// ADD this new function to main.js
+function updateRelatedPosts(newCategory, currentPostId) {
+    const newPostList = generatePostListHTML(newCategory, currentPostId);
+    
+    // Find the active related posts section and update it
+    const relatedSection = document.querySelector('.related-posts-section');
+    if (relatedSection) {
+        relatedSection.querySelector('.related-post-list').innerHTML = newPostList;
+        relatedSection.querySelectorAll('.related-tab').forEach(tab => {
+            tab.classList.toggle('active', tab.textContent === getCategoryProps(newCategory).title);
+        });
+    }
 }

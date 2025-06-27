@@ -615,8 +615,9 @@ body {
 
 /* === Related Posts Section === */
 
-#related-posts-container {
-  padding: 0 20px 20px 20px;
+.related-posts-section {
+  /* Keep all the properties inside the same */
+  padding-top: 20px; /* Adjust padding for the new structure */
   background-color: #fff;
 }
 
