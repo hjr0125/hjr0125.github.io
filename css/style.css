@@ -611,3 +611,69 @@ body {
 }
 
 /* === FINAL SCROLLBAR STYLE - END === */
+
+
+/* === Related Posts Section === */
+
+#related-posts-container {
+  padding: 0 20px 20px 20px;
+  background-color: #fff;
+}
+
+.related-separator {
+  border: 0;
+  border-top: 1px solid #ddd;
+  margin: 25px 0;
+}
+
+.related-tabs {
+  display: flex;
+  gap: 5px;
+  margin-bottom: 15px;
+}
+
+.related-tab {
+  padding: 5px 15px;
+  border: 1px solid #aaa;
+  border-radius: 5px;
+  font-size: 12px;
+  background: linear-gradient(to bottom, #fefefe, #f2f2f2);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.related-tab.active {
+  background: linear-gradient(to bottom, #6b9cde, #4a80ff);
+  border-color: #3a68b5;
+  color: white;
+  font-weight: bold;
+}
+
+.related-post-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.related-post-item {
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.related-post-item:hover {
+  background-color: #f5f5f5;
+}
+
+.related-post-title {
+  font-weight: bold;
+  font-size: 14px;
+  margin-bottom: 4px;
+}
+
+.related-post-meta {
+  font-size: 12px;
+  color: #666;
+}

@@ -55,6 +55,9 @@ async function showPost(postId) {
         document.getElementById('safari-title').textContent = post.title;
         document.getElementById('blog-home').style.display = 'none';
         
+        // Hide related posts container initially
+        document.getElementById('related-posts-container').style.display = 'none';
+
         document.querySelectorAll('.blog-post').forEach(el => el.remove());
         
         const postEl = document.createElement('div');
@@ -65,7 +68,10 @@ async function showPost(postId) {
             <div class="blog-post-content">${htmlContent}</div>
         `;
         document.getElementById('blog-content').appendChild(postEl);
-        document.getElementById('blog-content').scrollTop = 0; // 글 보기 화면으로 가면 항상 맨 위로
+        document.getElementById('blog-content').scrollTop = 0;
+
+        // NEW: Render the related posts section
+        renderRelatedPosts(post.category, post.id);
 
     } catch (error) {
         console.error("포스트를 불러오는 데 실패했습니다:", error);
@@ -290,6 +296,10 @@ function showHome(filterCategory = null) {
     document.getElementById('safari-title').textContent = 'My Blog';
     document.querySelectorAll('.blog-post').forEach(el => el.remove());
     document.getElementById('blog-home').style.display = 'block';
+    
+    // NEW: Hide the related posts section on the home page
+    document.getElementById('related-posts-container').style.display = 'none';
+
     updatePostList(filterCategory);
 
     document.querySelectorAll('.bookmark-item').forEach(item => {
@@ -400,4 +410,41 @@ function handleWindowMouseMove(e) {
 
 function handleWindowMouseLeave(e) {
     e.currentTarget.style.cursor = 'default';
+}
+
+// for related posts
+function generatePostListHTML(category, currentPostId) {
+    const relatedPosts = allPosts.filter(p => p.category === category && p.id !== currentPostId);
+
+    if (relatedPosts.length === 0) {
+        return '<div style="color: #888; padding: 10px 0;">No other articles in this section.</div>';
+    }
+
+    return relatedPosts.map(post => `
+        <div class="related-post-item" onclick="showPost('${post.id}')">
+            <div class="related-post-title">${post.title}</div>
+            <div class="related-post-meta">${post.date}</div>
+        </div>
+    `).join('');
+}
+
+// Add related posts rendering
+function renderRelatedPosts(activeCategory, currentPostId) {
+    const container = document.getElementById('related-posts-container');
+    if (!container) return;
+
+    const categories = ['tech', 'life']; // Define your blog categories here
+    const tabsHtml = categories.map(cat => {
+        const catProps = getCategoryProps(cat);
+        return `<div class="related-tab ${cat === activeCategory ? 'active' : ''}" onclick="renderRelatedPosts('${cat}', '${currentPostId}')">${catProps.title}</div>`;
+    }).join('');
+
+    const postListHtml = generatePostListHTML(activeCategory, currentPostId);
+
+    container.innerHTML = `
+        <hr class="related-separator">
+        <div class="related-tabs">${tabsHtml}</div>
+        <div class="related-post-list">${postListHtml}</div>
+    `;
+    container.style.display = 'block';
 }
