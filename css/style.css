@@ -500,26 +500,27 @@ body {
       transparent 3px
   );
 }
+/* === FINAL SCROLLBAR STYLE - START === */
 
-/* 스크롤바 스타일 */
+/* --- General Scrollbar Container --- */
 .blog-content::-webkit-scrollbar,
 .folder-content::-webkit-scrollbar,
 .textedit-content::-webkit-scrollbar {
   width: 16px;
   height: 16px;
-  background: transparent; /* 스크롤바 전체 배경은 투명하게 */
-
+  background: transparent;
 }
 
+/* --- Scrollbar Track --- */
 .blog-content::-webkit-scrollbar-track,
 .folder-content::-webkit-scrollbar-track,
 .textedit-content::-webkit-scrollbar-track {
   background-color: #f1f1f1;
   border: 1px solid #d0d0d0;
-  /* 안쪽 그림자 효과로 움푹 파인 느낌 주기 */
   box-shadow: inset 0 0 4px rgba(0,0,0,0.15);
 }
 
+/* --- Scrollbar Handle (Thumb) --- */
 .blog-content::-webkit-scrollbar-thumb,
 .folder-content::-webkit-scrollbar-thumb,
 .textedit-content::-webkit-scrollbar-thumb {
@@ -529,19 +530,29 @@ body {
   background-image: linear-gradient(to right, #d5e0f3, #b8c6e2 50%, #a1b3d6);
   box-shadow: inset 0 0 0 1px #e8eef9;
 }
-
 .blog-content::-webkit-scrollbar-thumb:hover,
 .folder-content::-webkit-scrollbar-thumb:hover,
 .textedit-content::-webkit-scrollbar-thumb:hover {
   background-color: #a1b3d6;
 }
 
+/* --- Scrollbar Buttons --- */
+
+/* 1. Hide all buttons by default to remove steppers */
 .blog-content::-webkit-scrollbar-button,
 .folder-content::-webkit-scrollbar-button,
 .textedit-content::-webkit-scrollbar-button {
+  display: none;
+}
+
+/* 2. Explicitly show the single buttons at each end of BOTH scrollbars */
+.blog-content::-webkit-scrollbar-button:start:decrement,
+.blog-content::-webkit-scrollbar-button:end:increment,
+.folder-content::-webkit-scrollbar-button:start:decrement,
+.folder-content::-webkit-scrollbar-button:end:increment,
+.textedit-content::-webkit-scrollbar-button:start:decrement,
+.textedit-content::-webkit-scrollbar-button:end:increment {
   display: block;
-  height: 15px;
-  width: 15px;
   background-color: #f0f0f0;
   border: 1px solid #a9a9a9;
   background-repeat: no-repeat;
@@ -549,6 +560,19 @@ body {
   box-shadow: inset 0 1px 1px rgba(255,255,255,0.7);
 }
 
+/* 3. Set specific dimensions */
+.blog-content::-webkit-scrollbar-button:vertical,
+.folder-content::-webkit-scrollbar-button:vertical,
+.textedit-content::-webkit-scrollbar-button:vertical {
+  height: 15px;
+}
+.blog-content::-webkit-scrollbar-button:horizontal,
+.folder-content::-webkit-scrollbar-button:horizontal,
+.textedit-content::-webkit-scrollbar-button:horizontal {
+  width: 0px;
+}
+
+/* 4. Style the active state */
 .blog-content::-webkit-scrollbar-button:active,
 .folder-content::-webkit-scrollbar-button:active,
 .textedit-content::-webkit-scrollbar-button:active {
@@ -556,32 +580,33 @@ body {
   box-shadow: inset 0 1px 1px rgba(0,0,0,0.1);
 }
 
+/* --- Button Icons (These selectors should already be in your file) --- */
 .blog-content::-webkit-scrollbar-button:vertical:decrement,
 .folder-content::-webkit-scrollbar-button:vertical:decrement,
 .textedit-content::-webkit-scrollbar-button:vertical:decrement {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10'%3E%3Cpath d='M5 3 L2 7 L8 7 Z' fill='%23555'/%3E%3C/svg%3E");
 }
-
 .blog-content::-webkit-scrollbar-button:vertical:increment,
 .folder-content::-webkit-scrollbar-button:vertical:increment,
 .textedit-content::-webkit-scrollbar-button:vertical:increment {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10'%3E%3Cpath d='M5 7 L2 3 L8 3 Z' fill='%23555'/%3E%3C/svg%3E");
 }
-
 .blog-content::-webkit-scrollbar-button:horizontal:decrement,
 .folder-content::-webkit-scrollbar-button:horizontal:decrement,
 .textedit-content::-webkit-scrollbar-button:horizontal:decrement {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10'%3E%3Cpath d='M7 5 L3 2 L3 8 Z' fill='%23555'/%3E%3C/svg%3E");
 }
-
 .blog-content::-webkit-scrollbar-button:horizontal:increment,
 .folder-content::-webkit-scrollbar-button:horizontal:increment,
 .textedit-content::-webkit-scrollbar-button:horizontal:increment {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10'%3E%3Cpath d='M3 5 L7 2 L7 8 Z' fill='%23555'/%3E%3C/svg%3E");
 }
 
+/* --- Scrollbar Corner --- */
 .blog-content::-webkit-scrollbar-corner,
 .folder-content::-webkit-scrollbar-corner,
 .textedit-content::-webkit-scrollbar-corner {
   background-color: transparent;
 }
+
+/* === FINAL SCROLLBAR STYLE - END === */
