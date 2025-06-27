@@ -1,6 +1,11 @@
 // js/main.js
 
 // --- State Management ---
+let homeState = {
+    category: 'all',
+    sort: 'newest',
+    page: 1,
+};
 let zIndexCounter = 100;
 let folderHistory = ['desktop'];
 let allPosts = [];
@@ -286,28 +291,34 @@ function getCategoryProps(category) {
 
 // --- Safari (Blog) Logic ---
 function showCategory(category) {
-    showHome(category);
-    document.getElementById('safari-title').textContent = `${getCategoryProps(category).title} - My Blog`;
+    document.getElementById('blog-home').style.display = 'block';
+    document.querySelectorAll('.blog-post').forEach(el => el.remove());
+
+    // Update state, keeping the current sort order
+    homeState.category = category;
+    homeState.page = 1;
+    renderHomepage();
+
+    // Update window title and bookmark bar
+    document.getElementById('safari-title').textContent = getCategoryProps(category).title;
     document.querySelectorAll('.bookmark-item').forEach(item => {
         item.classList.toggle('active', item.textContent.toLowerCase() === category);
     });
 }
 
-function showHome(filterCategory = null) {
+function showHome() {
     document.getElementById('safari-title').textContent = 'My Blog';
     document.querySelectorAll('.blog-post').forEach(el => el.remove());
     document.getElementById('blog-home').style.display = 'block';
-    
-    updatePostList(filterCategory);
 
+    homeState = { category: 'all', sort: 'newest', page: 1 };
+    renderHomepage();
+
+    // Update bookmark bar active state
     document.querySelectorAll('.bookmark-item').forEach(item => {
-        item.classList.toggle('active', !filterCategory && item.textContent === 'Home');
-        if (filterCategory) {
-            item.classList.toggle('active', item.textContent.toLowerCase() === filterCategory);
-        }
+        item.classList.toggle('active', item.textContent === 'Home');
     });
 }
-
 // --- Utilities ---
 function showNotification(message) {
     const notification = document.getElementById('notification-area');
@@ -487,4 +498,70 @@ function updateRelatedPosts(newCategory, currentPostId, page = 1) {
     document.querySelectorAll('.related-tab').forEach(tab => {
         tab.classList.toggle('active', tab.textContent === getCategoryProps(newCategory).title);
     });
+}
+
+function renderHomepage() {
+    // 1. Filter posts based on the current category from homeState
+    const filteredPosts = homeState.category === 'all'
+        ? [...allPosts]
+        : allPosts.filter(p => p.category === homeState.category);
+
+    // 2. Sort the filtered posts based on homeState
+    filteredPosts.sort((a, b) => {
+        const dateA = new Date(a.date);
+        const dateB = new Date(b.date);
+        return homeState.sort === 'newest' ? dateB - dateA : dateA - dateB;
+    });
+
+    // 3. Paginate the results
+    const postsPerPage = 5;
+    const totalPages = Math.ceil(filteredPosts.length / postsPerPage);
+    const startIndex = (homeState.page - 1) * postsPerPage;
+    const paginatedPosts = filteredPosts.slice(startIndex, startIndex + postsPerPage);
+
+    // 4. Render the list of posts
+    const postListEl = document.getElementById('post-list');
+    if (paginatedPosts.length > 0) {
+        postListEl.innerHTML = paginatedPosts.map(post => `
+            <div class="post-list-item" onclick="showPost('${post.id}')">
+                <div class="post-list-title">${post.title}</div>
+                <div class="post-list-meta">${post.date} | ${getCategoryProps(post.category).title}</div>
+            </div>
+        `).join('');
+    } else {
+        postListEl.innerHTML = '<div style="text-align: center; color: #888; padding: 40px 0;">No posts found.</div>';
+    }
+
+    // 5. Render ONLY the sorting dropdown
+    const controlsEl = document.getElementById('blog-controls');
+    controlsEl.innerHTML = `
+        <select class="sort-select" onchange="changeSortAndRender(this.value)">
+            <option value="newest" ${homeState.sort === 'newest' ? 'selected' : ''}>Sort by Newest</option>
+            <option value="oldest" ${homeState.sort === 'oldest' ? 'selected' : ''}>Sort by Oldest</option>
+        </select>
+    `;
+
+    // 6. Render the numeric pagination
+    const paginationEl = document.getElementById('pagination-container');
+    if (totalPages > 1) {
+        let paginationHTML = '';
+        for (let i = 1; i <= totalPages; i++) {
+            paginationHTML += `<div class="pagination-link ${homeState.page === i ? 'active' : ''}" onclick="changePageAndRender(${i})">${i}</div>`;
+        }
+        paginationEl.innerHTML = paginationHTML;
+    } else {
+        paginationEl.innerHTML = '';
+    }
+}
+
+// ADD these two new, smaller helper functions
+function changeSortAndRender(sortOrder) {
+    homeState.sort = sortOrder;
+    homeState.page = 1; // Reset to first page when sorting changes
+    renderHomepage();
+}
+
+function changePageAndRender(pageNumber) {
+    homeState.page = pageNumber;
+    renderHomepage();
 }

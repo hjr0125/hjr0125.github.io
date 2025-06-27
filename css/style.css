@@ -701,3 +701,80 @@ body {
   cursor: not-allowed;
   background: #f5f5f5;
 }
+
+/* In css/style.css */
+
+/* === Blog Homepage Enhancements === */
+.blog-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+  padding: 0 10px; /* Optional: adds some spacing */
+}
+
+.blog-main-title {
+  font-size: 28px;
+  margin: 0;
+}
+
+.blog-controls {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.control-tabs {
+  display: flex;
+  gap: 5px;
+}
+
+.control-tab {
+  padding: 4px 12px;
+  border: 1px solid #aaa;
+  border-radius: 5px;
+  font-size: 12px;
+  background: #f0f0f0;
+  cursor: pointer;
+}
+.control-tab.active {
+  background: #6b9cde;
+  border-color: #3a68b5;
+  color: white;
+  font-weight: bold;
+}
+
+.sort-select {
+  font-family: 'Lucida Grande', 'Apple SD Gothic Neo', sans-serif;
+  font-size: 12px;
+  border: 1px solid #aaa;
+  border-radius: 5px;
+  padding: 3px 5px;
+  background-color: #f0f0f0;
+}
+
+.pagination-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 5px;
+  margin-top: 20px;
+  padding: 0 10px;
+}
+
+.pagination-link {
+  padding: 5px 10px;
+  min-width: 30px;
+  text-align: center;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 13px;
+  background-color: #f9f9f9;
+}
+.pagination-link.active {
+  background-color: #6b9cde;
+  border-color: #3a68b5;
+  color: white;
+  font-weight: bold;
+}
