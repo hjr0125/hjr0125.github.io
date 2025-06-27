@@ -457,6 +457,12 @@ body {
     border-color: #777;
 }
 
+.toolbar-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+
 .dock-icon::after {
     content: '';
     position: absolute;

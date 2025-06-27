@@ -6,6 +6,7 @@ let homeState = {
     sort: 'newest',
     page: 1,
 };
+let safariHistory = []; // Add this new line
 let zIndexCounter = 100;
 let folderHistory = ['desktop'];
 let allPosts = [];
@@ -86,11 +87,21 @@ async function showPost(postId) {
 }
 
 function safariGoBack() {
-    showHome(safariState.lastCategory);
-    // scrollTop 복원
-    setTimeout(() => {
-        document.getElementById('blog-content').scrollTop = safariState.lastScrollPosition;
-    }, 0);
+    if (safariHistory.length > 1) {
+        safariHistory.pop(); // Remove the current page from history
+        const destination = safariHistory[safariHistory.length - 1]; // Get the previous location
+
+        // Check the destination and call the correct renderer
+        if (destination === 'home') {
+            showHome(true); // Call showHome without resetting history
+        } else if (['tech', 'life'].includes(destination)) {
+            showCategory(destination, true); // Call showCategory without resetting history
+        } else {
+            showPost(destination); // It's another article
+        }
+        
+        updateSafariBackButton();
+    }
 }
 
 function updatePostList(filterCategory = null) {
@@ -290,23 +301,27 @@ function getCategoryProps(category) {
 }
 
 // --- Safari (Blog) Logic ---
-function showCategory(category) {
+function showCategory(category, fromHistory = false) {
     document.getElementById('blog-home').style.display = 'block';
     document.querySelectorAll('.blog-post').forEach(el => el.remove());
 
-    // Update state, keeping the current sort order
     homeState.category = category;
     homeState.page = 1;
     renderHomepage();
 
-    // Update window title and bookmark bar
+    if (!fromHistory) {
+        // This is a new navigation, so reset the history to the category
+        safariHistory = [category];
+        updateSafariBackButton();
+    }
+
     document.getElementById('safari-title').textContent = getCategoryProps(category).title;
     document.querySelectorAll('.bookmark-item').forEach(item => {
         item.classList.toggle('active', item.textContent.toLowerCase() === category);
     });
 }
 
-function showHome() {
+function showHome(fromHistory = false) {
     document.getElementById('safari-title').textContent = 'My Blog';
     document.querySelectorAll('.blog-post').forEach(el => el.remove());
     document.getElementById('blog-home').style.display = 'block';
@@ -314,11 +329,17 @@ function showHome() {
     homeState = { category: 'all', sort: 'newest', page: 1 };
     renderHomepage();
 
-    // Update bookmark bar active state
+    if (!fromHistory) {
+        // This is a new navigation, so reset the history to 'home'
+        safariHistory = ['home'];
+        updateSafariBackButton();
+    }
+
     document.querySelectorAll('.bookmark-item').forEach(item => {
         item.classList.toggle('active', item.textContent === 'Home');
     });
 }
+
 // --- Utilities ---
 function showNotification(message) {
     const notification = document.getElementById('notification-area');
@@ -432,7 +453,7 @@ function generatePostListHTML(category, currentPostId, page = 1) {
     const paginatedPosts = relatedPosts.slice(startIndex, startIndex + postsPerPage);
 
     let listHtml = paginatedPosts.map(post => `
-        <div class="related-post-item" onclick="showPost('${post.id}')">
+        <div class="related-post-item" onclick="navigateToPost('${post.id}')">
             <div class="related-post-title">${post.title}</div>
             <div class="related-post-meta">${post.date}</div>
         </div>
@@ -523,7 +544,7 @@ function renderHomepage() {
     const postListEl = document.getElementById('post-list');
     if (paginatedPosts.length > 0) {
         postListEl.innerHTML = paginatedPosts.map(post => `
-            <div class="post-list-item" onclick="showPost('${post.id}')">
+            <div class="post-list-item" onclick="navigateToPost('${post.id}')">
                 <div class="post-list-title">${post.title}</div>
                 <div class="post-list-meta">${post.date} | ${getCategoryProps(post.category).title}</div>
             </div>
@@ -564,4 +585,21 @@ function changeSortAndRender(sortOrder) {
 function changePageAndRender(pageNumber) {
     homeState.page = pageNumber;
     renderHomepage();
+}
+
+// ADD these two new functions to js/main.js
+
+function navigateToPost(postId) {
+    // Avoid adding duplicate entries if the user re-clicks the same link
+    if (safariHistory[safariHistory.length - 1] !== postId) {
+        safariHistory.push(postId);
+    }
+    updateSafariBackButton();
+    showPost(postId);
+}
+
+function updateSafariBackButton() {
+    const backBtn = document.getElementById('safari-back-btn');
+    // The button is disabled if there are 1 or 0 items in history (nowhere to go back to)
+    backBtn.disabled = safariHistory.length <= 1;
 }
