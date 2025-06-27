@@ -312,8 +312,13 @@ function showNotification(message) {
 
 function updateTime() {
     const now = new Date();
-    const timeString = now.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }) + ' ' +
-                       now.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+    const month = now.getMonth() + 1;
+    const day = now.getDate();
+    const dayOfWeek = ['일', '월', '화', '수', '목', '금', '토'][now.getDay()];
+    const hours = now.getHours();
+    const minutes = now.getMinutes().toString().padStart(2, '0');
+
+    const timeString = `${month}월 ${day}일 (${dayOfWeek}) ${hours}:${minutes}`;
     document.querySelector('.menu-time').textContent = timeString;
 }
 
