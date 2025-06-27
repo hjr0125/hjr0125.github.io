@@ -384,56 +384,77 @@ function updateTime() {
     document.querySelector('.menu-time').textContent = timeString;
 }
 
-// --- Event Listeners for Dragging/Resizing ---
+/// --- Event Listeners for Dragging/Resizing ---
+
+// This function now correctly sets the active window before any other logic.
 function onInteractionStart(e) {
     if (window.innerWidth <= 768) return;
 
     const target = e.target;
-    currentWindow = target.closest('.window');
-    if (!currentWindow || !currentWindow.classList.contains('active')) return;
+    const clickedWindow = target.closest('.window');
 
-    const event = e.touches ? e.touches[0] : e;
+    // If no window was clicked, do nothing.
+    if (!clickedWindow) {
+        currentWindow = null;
+        return;
+    }
+    
+    // Set the globally tracked window
+    currentWindow = clickedWindow;
+
+    // Bring it to the front immediately
     bringToFront(currentWindow.id);
 
+    const event = e.touches ? e.touches[0] : e;
+    isDragging = false;
+    isResizing = false;
+    
+    // Check if the user is trying to resize
     if (target.classList.contains('resize-grip')) {
         isResizing = true;
-        
         const rect = currentWindow.getBoundingClientRect();
         initialWidth = rect.width;
         initialHeight = rect.height;
         initialMouseX = event.clientX;
         initialMouseY = event.clientY;
         e.preventDefault();
-        
+    
+    // Check if the user is trying to drag from the header
     } else if (target.closest('.window-header')) {
         isDragging = true;
         const rect = currentWindow.getBoundingClientRect();
         dragOffsetX = event.clientX - rect.left;
         dragOffsetY = event.clientY - rect.top;
+        e.preventDefault();
     }
-    currentWindow.style.transition = 'none';
+    
+    // For performance, remove transitions during drag/resize
+    if (isDragging || isResizing) {
+        currentWindow.style.transition = 'none';
+    }
 }
 
 
 function onInteractionMove(e) {
-    if (window.innerWidth <= 768) return;
+    if (window.innerWidth <= 768 || !currentWindow) return;
 
     const event = e.touches ? e.touches[0] : e;
-    if (isResizing && currentWindow) {
+    
+    if (isResizing) {
         const dx = event.clientX - initialMouseX;
         const dy = event.clientY - initialMouseY;
         
-        const newWidth = Math.max(320, initialWidth + dx);
-        const newHeight = Math.max(200, initialHeight + dy);
-
-        currentWindow.style.width = newWidth + 'px';
-        currentWindow.style.height = newHeight + 'px';
+        currentWindow.style.width = Math.max(320, initialWidth + dx) + 'px';
+        currentWindow.style.height = Math.max(200, initialHeight + dy) + 'px';
         e.preventDefault();
 
-    } else if (isDragging && currentWindow) {
+    } else if (isDragging) {
         let newLeft = event.clientX - dragOffsetX;
         let newTop = event.clientY - dragOffsetY;
-        newTop = Math.max(23, newTop); // 메뉴바 아래로 못가게
+        
+        // Constrain the window to the screen
+        newTop = Math.max(23, newTop); // Keep it below the menu bar
+        
         currentWindow.style.left = `${newLeft}px`;
         currentWindow.style.top = `${newTop}px`;
         e.preventDefault();
@@ -441,28 +462,19 @@ function onInteractionMove(e) {
 }
 
 function onInteractionEnd() {
-    if (currentWindow) currentWindow.style.transition = '';
+    if (currentWindow) {
+        // Restore transitions when the user lets go
+        currentWindow.style.transition = '';
+    }
     isDragging = false;
     isResizing = false;
-    currentWindow = null;
+    // Do not reset currentWindow to null here, it's needed for other interactions.
 }
 
-function handleWindowMouseMove(e) {
-    if (isDragging || isResizing) return;
-    const windowEl = e.currentTarget;
-    if (!windowEl.classList.contains('active')) return;
-
-    if (e.target.closest('.window-header')) {
-        windowEl.style.cursor = 'move';
-    } else if (windowEl.style.cursor === 'move') {
-        windowEl.style.cursor = 'default';
-    }
-}
-
-
-function handleWindowMouseLeave(e) {
-    e.currentTarget.style.cursor = 'default';
-}
+// These two functions are no longer needed and have been removed 
+// to prevent conflicts. The logic is handled by the main listeners.
+// handleWindowMouseMove() - REMOVED
+// handleWindowMouseLeave() - REMOVED
 
 // for related posts
 // REPLACE the old generatePostListHTML function with this one
