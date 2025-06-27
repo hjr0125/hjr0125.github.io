@@ -784,3 +784,96 @@ body {
   color: white;
   font-weight: bold;
 }
+
+/* TextEdit Window Enhancements */
+.textedit-window .window-body {
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  background-color: #f0f0f0; /* Match header color */
+}
+
+.textedit-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  border-bottom: 1px solid #b0b0b0;
+  background: #ededed;
+}
+
+.textedit-toolbar .toolbar-button i {
+  margin-right: 6px;
+}
+
+.textedit-meta-fields {
+  background: #fff;
+  padding: 10px 15px;
+  border-bottom: 1px solid #ddd;
+  font-size: 13px;
+}
+
+.meta-field {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.meta-field:last-child {
+  margin-bottom: 0;
+}
+
+.meta-field label {
+  width: 70px;
+  color: #666;
+  text-align: right;
+  margin-right: 10px;
+  font-weight: bold;
+}
+
+.meta-field input[type="text"],
+.meta-field select {
+  flex-grow: 1;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding: 5px 8px;
+  font-family: 'Lucida Grande', 'Apple SD Gothic Neo', sans-serif;
+  font-size: 13px;
+}
+
+.textedit-editor-area {
+  flex-grow: 1;
+  display: flex;
+  overflow: hidden;
+}
+
+#markdown-input, #markdown-preview {
+  width: 50%;
+  height: 100%;
+  padding: 15px;
+  overflow-y: scroll;
+  box-sizing: border-box;
+}
+
+#markdown-input {
+  border: none;
+  outline: none;
+  resize: none;
+  font-family: 'Menlo', 'Monaco', monospace;
+  font-size: 13px;
+  line-height: 1.6;
+  background: #fff;
+  border-right: 1px solid #ddd;
+}
+
+#markdown-preview {
+  background: #fdfdfd;
+  line-height: 1.7;
+  font-size: 14px;
+}
+
+#markdown-preview img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 5px;
+}

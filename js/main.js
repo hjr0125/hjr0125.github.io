@@ -296,7 +296,164 @@ const openSafari = (postId = null) => {
         showHome();
     }
 };
-const openTextEdit = () => openWindow('textedit-window');
+const openTextEdit = () => {
+    openWindow('textedit-window');
+    setupTextEditor();
+};
+
+function setupTextEditor() {
+    // Populate category dropdown
+    const categorySelect = document.getElementById('post-category');
+    categorySelect.innerHTML = ''; // Clear existing options
+
+    blogCategories.forEach((props, category) => {
+        const option = document.createElement('option');
+        option.value = category;
+        option.textContent = props.title.replace(' Blog', '');
+        categorySelect.appendChild(option);
+    });
+
+    const newCategoryOption = document.createElement('option');
+    newCategoryOption.value = 'new-category';
+    newCategoryOption.textContent = 'New Category...';
+    categorySelect.appendChild(newCategoryOption);
+
+    // Add event listener for "New Category"
+    categorySelect.onchange = (e) => {
+        if (e.target.value === 'new-category') {
+            const newCategoryName = prompt("Enter new category name (e.g., 'life', 'dev'):");
+            if (newCategoryName && newCategoryName.trim() !== '') {
+                const newCatKey = newCategoryName.trim().toLowerCase();
+                if (!blogCategories.has(newCatKey)) {
+                    const title = newCatKey.charAt(0).toUpperCase() + newCatKey.slice(1);
+                    blogCategories.set(newCatKey, {
+                        title: `${title} Blog`,
+                        path: `/Desktop/${title} Blog`
+                    });
+                    // Re-setup the editor to reflect the new category
+                    setupTextEditor();
+                    // Set the new category as selected
+                    categorySelect.value = newCatKey;
+                } else {
+                    alert("Category already exists.");
+                    categorySelect.value = Array.from(blogCategories.keys())[0];
+                }
+            } else {
+                categorySelect.value = Array.from(blogCategories.keys())[0];
+            }
+        }
+    };
+
+    // Setup real-time markdown preview
+    const markdownInput = document.getElementById('markdown-input');
+    const markdownPreview = document.getElementById('markdown-preview');
+    markdownInput.onkeyup = () => {
+        markdownPreview.innerHTML = marked.parse(markdownInput.value);
+    };
+    
+    // Clear fields for a new post
+    document.getElementById('post-title').value = '';
+    markdownInput.value = '';
+    markdownPreview.innerHTML = '';
+
+    // Handle Image Attachment
+    const attachBtn = document.getElementById('attach-image-btn');
+    const imageInput = document.getElementById('image-upload-input');
+    attachBtn.onclick = () => imageInput.click();
+
+    imageInput.onchange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                // For demonstration, we'll use the base64 data URL.
+                // In a real scenario, you'd upload this and get back a URL.
+                const imageUrl = event.target.result;
+                const imageName = file.name.split('.')[0];
+                const markdownForImage = `![${imageName}](${imageUrl})\n`;
+                
+                // Insert the markdown at the current cursor position
+                const start = markdownInput.selectionStart;
+                const end = markdownInput.selectionEnd;
+                markdownInput.value = markdownInput.value.substring(0, start) + markdownForImage + markdownInput.value.substring(end);
+                
+                // Trigger preview update
+                markdownPreview.innerHTML = marked.parse(markdownInput.value);
+
+                showNotification("Image attached. Note: This is a local preview.");
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+}
+
+function publishPost() {
+    const title = document.getElementById('post-title').value.trim();
+    const category = document.getElementById('post-category').value;
+    const content = document.getElementById('markdown-input').value.trim();
+
+    if (!title || !category || !content) {
+        showNotification("Title, category, and content are required.");
+        return;
+    }
+
+    // --- File & JSON Generation ---
+    const now = new Date();
+    const dateString = now.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+    const fileName = title.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '') + '.md';
+    const newPostId = `${category}-${Math.floor(Math.random() * 1000)}`;
+    const filePath = `./posts/${category}/${fileName}`;
+
+    // Create the new post object for posts.json
+    const newPostEntry = {
+      id: newPostId,
+      category: category,
+      title: title,
+      date: dateString,
+      path: filePath
+    };
+
+    // Create a deep copy of the current posts and add the new one
+    const updatedPosts = JSON.parse(JSON.stringify(allPosts));
+    updatedPosts.unshift(newPostEntry); // Add to the beginning
+
+    const updatedPostsJson = JSON.stringify({ posts: updatedPosts }, null, 2);
+
+    // --- Display Instructions to User ---
+    const instructionMessage = `
+        <h3>Post Ready to Publish!</h3>
+        <p>Because this is a static site, you need to manually add the files.</p>
+        <ol>
+            <li>
+                <strong>Create the Markdown File:</strong>
+                <p>Create a new file named <code>${fileName}</code> inside the <code>/posts/${category}/</code> folder.</p>
+                <p>Copy the content below into it:</p>
+                <textarea readonly style="width: 100%; height: 150px; margin-top: 5px;">${content}</textarea>
+            </li>
+            <li>
+                <strong>Update posts.json:</strong>
+                <p>Replace the entire content of your <code>posts.json</code> file with the following:</p>
+                <textarea readonly style="width: 100%; height: 200px; margin-top: 5px;">${updatedPostsJson}</textarea>
+            </li>
+             <li>
+                <strong>Image Handling:</strong>
+                <p>If you attached images, save them in <code>/posts/${category}/imgs/</code> and update the image paths in your new Markdown file from the long 'data:image/...' URL to the relative path (e.g., <code>./imgs/your-image.png</code>).</p>
+            </li>
+        </ol>
+        <p>After saving, the new post will appear on your blog.</p>
+    `;
+
+    // Display this message in a new, temporary window or a modal.
+    // For simplicity, we'll use the Safari window to display the output.
+    openWindow('safari-window');
+    document.getElementById('safari-title').textContent = 'Publishing Instructions';
+    document.getElementById('blog-home').style.display = 'none';
+    const contentArea = document.getElementById('blog-content');
+    contentArea.innerHTML = `<div class="blog-post active" style="padding: 20px;">${instructionMessage}</div>`;
+    contentArea.scrollTop = 0;
+}
+
+
 const openFolder = (category) => {
     openWindow('folder-window');
     navigateToFolder(category);
@@ -659,3 +816,5 @@ function updateRelatedPosts(newCategory, currentPostId, page = 1) {
         tab.classList.toggle('active', tab.textContent === getCategoryProps(newCategory).title);
     });
 }
+
+

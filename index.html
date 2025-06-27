@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>꾸꾸네</title>
   <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
   <div class="menu-bar">
@@ -67,8 +68,28 @@
       <div class="window-title">New Post - TextEdit</div>
     </div>
     <div class="window-body">
-      <div class="textedit-content">
-        <textarea class="text-editor" id="post-editor" placeholder="Title: Your Title&#10;Category: tech&#10;&#10;Start writing your content here..."></textarea>
+      <div class="textedit-toolbar">
+        <button class="toolbar-button" id="send-post-btn" onclick="publishPost()">
+          <i class="fas fa-paper-plane"></i> Send
+        </button>
+        <button class="toolbar-button" id="attach-image-btn">
+          <i class="fas fa-paperclip"></i> Attach
+        </button>
+        <input type="file" id="image-upload-input" accept="image/*" style="display: none;">
+      </div>
+      <div class="textedit-meta-fields">
+        <div class="meta-field">
+          <label for="post-title">Title:</label>
+          <input type="text" id="post-title" placeholder="Enter post title">
+        </div>
+        <div class="meta-field">
+          <label for="post-category">Category:</label>
+          <select id="post-category"></select>
+        </div>
+      </div>
+      <div class="textedit-editor-area">
+        <textarea id="markdown-input" placeholder="Start writing your Markdown content here..."></textarea>
+        <div id="markdown-preview" class="blog-post-content"></div>
       </div>
     </div>
     <div class="resize-grip"></div>
