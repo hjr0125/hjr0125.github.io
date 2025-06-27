@@ -367,13 +367,67 @@ body {
 }
 
 /* Responsive Design */
+/* blog/css/style.css 파일의 @media (max-width: 768px) 부분을 교체하세요. */
+
 @media (max-width: 768px) {
-  .desktop { bottom: 80px; }
-  .window { width: 95% !important; height: 85% !important; top: 8% !important; left: 2.5% !important; }
-  .dock { height: 60px; padding: 5px; gap: 10px; }
-  .dock-icon { width: 40px; height: 40px; }
-  .desktop-icon { position: static; display: inline-block; margin: 10px; }
-  .desktop { display: flex; flex-wrap: wrap; justify-content: flex-start; align-content: flex-start; }
+  /* --- 모바일 기본 레이아웃 조정 --- */
+  .menu-bar,
+  .desktop,
+  .resize-grip,
+  .window-controls {
+    display: none; /* 상단 메뉴, 데스크탑 아이콘, 리사이즈 핸들, 창 조절 버튼 숨기기 */
+  }
+
+  /* --- 창(Window) 스타일 --- */
+  .window {
+    /* 기존의 width, height, top, left 속성을 덮어씁니다. */
+    width: 100% !important;
+    height: calc(100% - 65px) !important; /* Dock 높이(60px)와 여백(5px)을 제외한 전체 높이 */
+    top: 0 !important;
+    left: 0 !important;
+    border-radius: 0; /* 모서리 둥글게 하지 않음 */
+    box-shadow: none; /* 그림자 제거 */
+    transition: none; /* 부드러운 전환 효과 제거 */
+  }
+
+  .window-header {
+    justify-content: center; /* 창 제목 중앙 정렬 */
+  }
+  
+  .window.minimized {
+    /* 최소화 애니메이션이 모바일에서 보이지 않도록 함 */
+    display: none;
+  }
+
+  /* --- Dock 스타일 --- */
+  .dock { 
+    height: 60px; 
+    padding: 5px; 
+    gap: 10px; 
+    border-radius: 0; /* 상단 모서리만 둥글게 (선택 사항) */
+    border-top-left-radius: 20px;
+    border-top-right-radius: 20px;
+  }
+  .dock-icon { 
+    width: 40px; 
+    height: 40px; 
+  }
+  .dock-icon:hover {
+    transform: none; /* 모바일에서 아이콘 확대 효과 제거 */
+  }
+
+  /* --- 콘텐츠 스크롤 --- */
+  .blog-content,
+  .textedit-content,
+  .folder-content {
+    /* 스크롤바가 콘텐츠를 가리지 않도록 패딩 조정 */
+    padding-right: 10px;
+  }
+  
+  /* --- 텍스트 선택 --- */
+  .blog-content, .text-editor, .folder-item-name, .icon-label { 
+    user-select: text; 
+  }
 }
 
 /* Text selection */
