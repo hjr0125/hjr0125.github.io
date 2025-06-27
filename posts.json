@@ -20,6 +20,124 @@
       "title": "Daily Thoughts",
       "date": "June 20, 2025",
       "path": "./posts/life/01-daily-thoughts.md"
+    },
+    {
+      "id": "tech-03",
+      "category": "tech",
+      "title": "Mac OS X 10.0 Style Blog! copy 2",
+      "date": "June 22, 2025",
+      "path": "./posts/tech/01-osx-style-blog copy 2.md"
+    },
+    {
+      "id": "tech-04",
+      "category": "tech",
+      "title": "Mac OS X 10.0 Style Blog! copy 3",
+      "date": "June 22, 2025",
+      "path": "./posts/tech/01-osx-style-blog copy 3.md"
+    },
+    {
+      "id": "tech-05",
+      "category": "tech",
+      "title": "Mac OS X 10.0 Style Blog! copy 4",
+      "date": "June 22, 2025",
+      "path": "./posts/tech/01-osx-style-blog copy 4.md"
+    },
+    {
+      "id": "tech-06",
+      "category": "tech",
+      "title": "Mac OS X 10.0 Style Blog! copy 5",
+      "date": "June 22, 2025",
+      "path": "./posts/tech/01-osx-style-blog copy 5.md"
+    },
+    {
+      "id": "tech-07",
+      "category": "tech",
+      "title": "Mac OS X 10.0 Style Blog! copy 6",
+      "date": "June 22, 2025",
+      "path": "./posts/tech/01-osx-style-blog copy 6.md"
+    },
+    {
+      "id": "tech-08",
+      "category": "tech",
+      "title": "Mac OS X 10.0 Style Blog! copy 7",
+      "date": "June 22, 2025",
+      "path": "./posts/tech/01-osx-style-blog copy 7.md"
+    },
+    {
+      "id": "tech-09",
+      "category": "tech",
+      "title": "Mac OS X 10.0 Style Blog! copy 8",
+      "date": "June 22, 2025",
+      "path": "./posts/tech/01-osx-style-blog copy 8.md"
+    },
+    {
+      "id": "tech-10",
+      "category": "tech",
+      "title": "Mac OS X 10.0 Style Blog! copy 9",
+      "date": "June 22, 2025",
+      "path": "./posts/tech/01-osx-style-blog copy 9.md"
+    },
+    {
+      "id": "tech-11",
+      "category": "tech",
+      "title": "Mac OS X 10.0 Style Blog! copy 10",
+      "date": "June 22, 2025",
+      "path": "./posts/tech/01-osx-style-blog copy 10.md"
+    },
+    {
+      "id": "tech-12",
+      "category": "tech",
+      "title": "Mac OS X 10.0 Style Blog! copy 11",
+      "date": "June 22, 2025",
+      "path": "./posts/tech/01-osx-style-blog copy 11.md"
+    },
+    {
+      "id": "tech-13",
+      "category": "tech",
+      "title": "Mac OS X 10.0 Style Blog! copy 12",
+      "date": "June 22, 2025",
+      "path": "./posts/tech/01-osx-style-blog copy 12.md"
+    },
+    {
+      "id": "tech-14",
+      "category": "tech",
+      "title": "Mac OS X 10.0 Style Blog! copy 13",
+      "date": "June 22, 2025",
+      "path": "./posts/tech/01-osx-style-blog copy 13.md"
+    },
+    {
+      "id": "tech-15",
+      "category": "tech",
+      "title": "Mac OS X 10.0 Style Blog! copy 14",
+      "date": "June 22, 2025",
+      "path": "./posts/tech/01-osx-style-blog copy 14.md"
+    },
+    {
+      "id": "tech-16",
+      "category": "tech",
+      "title": "Mac OS X 10.0 Style Blog! copy 15",
+      "date": "June 22, 2025",
+      "path": "./posts/tech/01-osx-style-blog copy 15.md"
+    },
+    {
+      "id": "tech-17",
+      "category": "tech",
+      "title": "Mac OS X 10.0 Style Blog! copy 16",
+      "date": "June 22, 2025",
+      "path": "./posts/tech/01-osx-style-blog copy 16.md"
+    },
+    {
+      "id": "tech-18",
+      "category": "tech",
+      "title": "Mac OS X 10.0 Style Blog! copy 17",
+      "date": "June 22, 2025",
+      "path": "./posts/tech/01-osx-style-blog copy 17.md"
+    },
+    { "id": "tech-19",
+      "category": "tech", 
+      "title": "Mac OS X 10.0 Style Blog! copy 18",
+      "date": "June 22, 2025",
+      "path": "./posts/tech/01-osx-style-blog copy 18.md"
     }
   ]
 }
