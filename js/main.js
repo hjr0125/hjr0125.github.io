@@ -7,6 +7,7 @@ let homeState = {
     page: 1,
 };
 let safariHistory = []; // Add this new line
+let blogCategories = new Map(); // Add this new line
 let zIndexCounter = 100;
 let folderHistory = ['desktop'];
 let allPosts = [];
@@ -25,27 +26,35 @@ document.addEventListener('DOMContentLoaded', async () => {
         const data = await response.json();
         allPosts = data.posts.sort((a, b) => new Date(b.date) - new Date(a.date));
 
-        updateTime();
-        setInterval(updateTime, 10000);
-
-        document.querySelectorAll('.window').forEach(win => {
-            win.addEventListener('mousemove', handleWindowMouseMove);
-            win.addEventListener('mouseleave', handleWindowMouseLeave);
+        // Dynamically discover categories
+        allPosts.forEach(post => {
+            if (!blogCategories.has(post.category)) {
+                // Capitalize the first letter for the title
+                const title = post.category.charAt(0).toUpperCase() + post.category.slice(1);
+                blogCategories.set(post.category, {
+                    title: `${title} Blog`,
+                    path: `/Desktop/${title} Blog`
+                });
+            }
         });
 
-        document.addEventListener('mousedown', onInteractionStart);
-        document.addEventListener('mousemove', onInteractionMove);
-        document.addEventListener('touchmove', onInteractionMove, { passive: false });
-        document.addEventListener('mouseup', onInteractionEnd);
+        // Dynamically build the UI
+        generateDesktopIcons();
+        generateBookmarkItems();
 
-        // 초기 로드 시 홈 화면 표시
-        showHome();
+        updateTime();
+        setInterval(updateTime, 10000);
         
+        // ... (the rest of the function remains the same)
+        
+        showHome(); // Initial load
+
     } catch (error) {
         console.error("블로그 글 목록을 불러오는 데 실패했습니다:", error);
         showNotification("Error: Could not load blog posts.");
     }
 });
+
 
 
 // --- Safari (Blog) Logic ---
@@ -88,16 +97,15 @@ async function showPost(postId) {
 
 function safariGoBack() {
     if (safariHistory.length > 1) {
-        safariHistory.pop(); // Remove the current page from history
-        const destination = safariHistory[safariHistory.length - 1]; // Get the previous location
+        safariHistory.pop();
+        const destination = safariHistory[safariHistory.length - 1];
 
-        // Check the destination and call the correct renderer
         if (destination === 'home') {
-            showHome(true); // Call showHome without resetting history
-        } else if (['tech', 'life'].includes(destination)) {
-            showCategory(destination, true); // Call showCategory without resetting history
+            showHome(true);
+        } else if (blogCategories.has(destination)) { // Generic check
+            showCategory(destination, true);
         } else {
-            showPost(destination); // It's another article
+            showPost(destination);
         }
         
         updateSafariBackButton();
@@ -129,38 +137,44 @@ function updatePostList(filterCategory = null) {
 
 // --- Folder (Finder) Logic ---
 function updateFolderContent(category) {
-    const { title, path } = getCategoryProps(category);
-    document.getElementById('folder-title').textContent = title;
-    document.getElementById('folder-path').textContent = path;
+    const props = getCategoryProps(category) || {};
+    document.getElementById('folder-title').textContent = props.title || category;
+    document.getElementById('folder-path').textContent = props.path || `/Desktop/${category}`;
     const folderContent = document.getElementById('folder-content');
     folderContent.innerHTML = '';
 
-    const items = (category === 'desktop') 
-        ? [
-            { name: 'Tech Blog', icon: '📁', type: 'folder', category: 'tech' },
-            { name: 'Life Blog', icon: '📁', type: 'folder', category: 'life' },
-        ]
-        : allPosts
+    let items = [];
+    if (category === 'desktop') {
+        blogCategories.forEach((props, cat) => {
+            items.push({ name: props.title, icon: '📁', type: 'folder', category: cat });
+        });
+    } else {
+        items = allPosts
             .filter(post => post.category === category)
             .map(post => ({
                 name: post.title,
                 icon: '📄',
                 type: 'file',
-                action: () => openSafari(post.id)
+                // THIS IS THE CORRECTED ACTION
+                action: () => openSafari(post.id) 
             }));
-    
+    }
+
     if (items.length === 0) {
-         folderContent.innerHTML = `<div style="grid-column: 1 / -1; text-align: center; color: #888; margin-top: 40px;">Folder is empty</div>`;
+        folderContent.innerHTML = `<div style="grid-column: 1 / -1; text-align: center; color: #888; margin-top: 40px;">Folder is empty</div>`;
     } else {
-         items.forEach(item => {
+        items.forEach(item => {
             const itemEl = document.createElement('div');
             itemEl.className = 'folder-item';
-            itemEl.innerHTML = `<div class="folder-item-icon">${item.icon}</div><div class="folder-item-name">${item.name}</div>`;
+            itemEl.innerHTML = `
+                <div class="folder-item-icon">${item.icon}</div>
+                <div class="folder-item-name">${item.name}</div>
+            `;
             
-            const eventAction = item.type === 'folder' ? () => navigateToFolder(item.category) : item.action;
+            const eventAction = item.type === 'folder'
+                ? () => navigateToFolder(item.category)
+                : item.action;
 
-            // *** 변경된 부분 ***
-            // 모바일에서는 onclick, 데스크탑에서는 ondblclick으로 폴더/파일을 엽니다.
             if (window.innerWidth <= 768) {
                 itemEl.onclick = eventAction;
             } else {
@@ -171,6 +185,7 @@ function updateFolderContent(category) {
         });
     }
 }
+
 
 
 // --- "savePost" (Download) ---
@@ -218,10 +233,14 @@ function openWindow(windowId) {
 }
 
 const openSafari = (postId = null) => {
-    openWindow('safari-window');
+    openWindow('safari-window'); // This makes the Safari window visible and brings it to the front
     if (postId) {
-        showPost(postId);
+        // When opening a file from the Finder, we start a new navigation path.
+        // The "back" button should take the user to the main blog page.
+        safariHistory = ['home']; // Set the base of the history to the homepage
+        navigateToPost(postId);   // Navigate to the post, which adds it to the history
     } else {
+        // If opening Safari with no specific post, just show the home page
         showHome();
     }
 };
@@ -292,13 +311,16 @@ function updateFolderBackButton() {
 }
 
 function getCategoryProps(category) {
-     const props = {
-        tech: { title: 'Tech Blog', path: '/Desktop/Tech Blog' },
-        life: { title: 'Life Blog', path: '/Desktop/Life Blog' },
+    if (blogCategories.has(category)) {
+        return blogCategories.get(category);
+    }
+    // Fallbacks for special cases
+    return {
+        all: { title: 'All' },
         desktop: { title: 'Desktop', path: '/Desktop' }
-    };
-    return props[category] || props.desktop;
+    }[category];
 }
+
 
 // --- Safari (Blog) Logic ---
 function showCategory(category, fromHistory = false) {
@@ -484,25 +506,20 @@ function generatePostListHTML(category, currentPostId, page = 1) {
 }
 
 // Add related posts rendering
-// REPLACE the old renderRelatedPosts function with this one
 function renderRelatedPosts(activeCategory, currentPostId) {
-    const categories = ['tech', 'life'];
+    const categories = Array.from(blogCategories.keys()); // Get all categories dynamically
     const tabsHtml = categories.map(cat => {
         const catProps = getCategoryProps(cat);
-        // We now call updateRelatedPosts to handle tab clicks, starting from page 1
-        return `<div class="related-tab ${cat === activeCategory ? 'active' : ''}" onclick="updateRelatedPosts('${cat}', '${currentPostId}', 1)">${catProps.title}</div>`;
+        return `<div class="related-tab ${cat === activeCategory ? 'active' : ''}" onclick="updateRelatedPosts('${cat}', '${currentPostId}', 1)">${catProps.title.replace(' Blog','')}</div>`;
     }).join('');
 
-    // Get the initial list HTML for the active category, page 1
     const postListHtml = generatePostListHTML(activeCategory, currentPostId, 1);
 
     return `
         <div class="related-posts-section">
             <hr class="related-separator">
             <div class="related-tabs">${tabsHtml}</div>
-            <div class="related-post-list-wrapper">
-                ${postListHtml}
-            </div>
+            <div class="related-post-list-wrapper">${postListHtml}</div>
         </div>
     `;
 }
@@ -602,4 +619,39 @@ function updateSafariBackButton() {
     const backBtn = document.getElementById('safari-back-btn');
     // The button is disabled if there are 1 or 0 items in history (nowhere to go back to)
     backBtn.disabled = safariHistory.length <= 1;
+}
+
+// ADD these two new functions to js/main.js
+
+function generateDesktopIcons() {
+    const container = document.getElementById('desktop-icons');
+    if (!container) return;
+    
+    let topPos = 30;
+    blogCategories.forEach((props, category) => {
+        const iconEl = document.createElement('div');
+        iconEl.className = 'desktop-icon folder-icon';
+        iconEl.style.top = `${topPos}px`;
+        iconEl.style.left = '30px'; // Or dynamically position them
+        iconEl.setAttribute('ondblclick', `openFolder('${category}')`);
+        iconEl.innerHTML = `
+            <div class="icon-image">📁</div>
+            <div class="icon-label">${props.title}</div>
+        `;
+        container.appendChild(iconEl);
+        topPos += 100; // Stagger them vertically
+    });
+}
+
+function generateBookmarkItems() {
+    const container = document.getElementById('bookmark-bar');
+    if (!container) return;
+
+    blogCategories.forEach((props, category) => {
+        const itemEl = document.createElement('div');
+        itemEl.className = 'bookmark-item';
+        itemEl.setAttribute('onclick', `showCategory('${category}')`);
+        itemEl.textContent = props.title.replace(' Blog', ''); // e.g., "Tech"
+        container.appendChild(itemEl);
+    });
 }

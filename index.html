@@ -21,15 +21,7 @@
     <div class="menu-time"></div>
   </div>
   
-  <div class="desktop">
-    <div class="desktop-icon folder-icon" style="top: 30px; left: 30px;" ondblclick="openFolder('tech')">
-      <div class="icon-image">📁</div>
-      <div class="icon-label">Tech Blog</div>
-    </div>
-    <div class="desktop-icon folder-icon" style="top: 30px; left: 130px;" ondblclick="openFolder('life')">
-      <div class="icon-image">📁</div>
-      <div class="icon-label">Life Blog</div>
-    </div>
+  <div class="desktop" id="desktop-icons">
   </div>
   
   <div class="window safari-window" id="safari-window">
@@ -44,10 +36,8 @@
     <div class="window-body">
       <div class="safari-toolbar">
         <button class="toolbar-button" id="safari-back-btn" onclick="safariGoBack()">Back</button>
-        <div class="bookmark-bar">
+        <div class="bookmark-bar" id="bookmark-bar">
           <div class="bookmark-item active" onclick="showHome()">Home</div>
-          <div class="bookmark-item" onclick="showCategory('tech')">Tech</div>
-          <div class="bookmark-item" onclick="showCategory('life')">Life</div>
         </div>
       </div>
       <div class="blog-content" id="blog-content">
