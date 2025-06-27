@@ -411,19 +411,44 @@ function handleWindowMouseLeave(e) {
 }
 
 // for related posts
-function generatePostListHTML(category, currentPostId) {
+// REPLACE the old generatePostListHTML function with this one
+function generatePostListHTML(category, currentPostId, page = 1) {
     const relatedPosts = allPosts.filter(p => p.category === category && p.id !== currentPostId);
+    const postsPerPage = 5;
+    const totalPages = Math.ceil(relatedPosts.length / postsPerPage);
 
-    if (relatedPosts.length === 0) {
-        return '<div style="color: #888; padding: 10px 0;">No other articles in this section.</div>';
-    }
+    const startIndex = (page - 1) * postsPerPage;
+    const paginatedPosts = relatedPosts.slice(startIndex, startIndex + postsPerPage);
 
-    return relatedPosts.map(post => `
+    let listHtml = paginatedPosts.map(post => `
         <div class="related-post-item" onclick="showPost('${post.id}')">
             <div class="related-post-title">${post.title}</div>
             <div class="related-post-meta">${post.date}</div>
         </div>
     `).join('');
+
+    if (paginatedPosts.length === 0) {
+        listHtml = '<div style="color: #888; padding: 10px 0;">No other articles in this section.</div>';
+    }
+
+    let paginationHtml = '';
+    if (totalPages > 1) {
+        paginationHtml = `
+            <div class="related-pagination">
+                <button class="pagination-btn" onclick="updateRelatedPosts('${category}', '${currentPostId}', ${page - 1})" ${page === 1 ? 'disabled' : ''}>
+                    Previous
+                </button>
+                <button class="pagination-btn" onclick="updateRelatedPosts('${category}', '${currentPostId}', ${page + 1})" ${page === totalPages ? 'disabled' : ''}>
+                    Next
+                </button>
+            </div>
+        `;
+    }
+
+    return `
+        <div class="related-post-list">${listHtml}</div>
+        ${paginationHtml}
+    `;
 }
 
 // Add related posts rendering
@@ -432,32 +457,34 @@ function renderRelatedPosts(activeCategory, currentPostId) {
     const categories = ['tech', 'life'];
     const tabsHtml = categories.map(cat => {
         const catProps = getCategoryProps(cat);
-        // Note: The onclick now passes the 'currentPostId' to keep track of the main article
-        return `<div class="related-tab ${cat === activeCategory ? 'active' : ''}" onclick="updateRelatedPosts('${cat}', '${currentPostId}')">${catProps.title}</div>`;
+        // We now call updateRelatedPosts to handle tab clicks, starting from page 1
+        return `<div class="related-tab ${cat === activeCategory ? 'active' : ''}" onclick="updateRelatedPosts('${cat}', '${currentPostId}', 1)">${catProps.title}</div>`;
     }).join('');
 
-    const postListHtml = generatePostListHTML(activeCategory, currentPostId);
+    // Get the initial list HTML for the active category, page 1
+    const postListHtml = generatePostListHTML(activeCategory, currentPostId, 1);
 
-    // This function now returns the complete HTML for the section
     return `
         <div class="related-posts-section">
             <hr class="related-separator">
             <div class="related-tabs">${tabsHtml}</div>
-            <div class="related-post-list">${postListHtml}</div>
+            <div class="related-post-list-wrapper">
+                ${postListHtml}
+            </div>
         </div>
     `;
 }
 
 // ADD this new function to main.js
-function updateRelatedPosts(newCategory, currentPostId) {
-    const newPostList = generatePostListHTML(newCategory, currentPostId);
+function updateRelatedPosts(newCategory, currentPostId, page = 1) {
+    const newContentHtml = generatePostListHTML(newCategory, currentPostId, page);
     
-    // Find the active related posts section and update it
-    const relatedSection = document.querySelector('.related-posts-section');
-    if (relatedSection) {
-        relatedSection.querySelector('.related-post-list').innerHTML = newPostList;
-        relatedSection.querySelectorAll('.related-tab').forEach(tab => {
-            tab.classList.toggle('active', tab.textContent === getCategoryProps(newCategory).title);
-        });
+    const wrapper = document.querySelector('.related-post-list-wrapper');
+    if (wrapper) {
+        wrapper.innerHTML = newContentHtml;
     }
+    
+    document.querySelectorAll('.related-tab').forEach(tab => {
+        tab.classList.toggle('active', tab.textContent === getCategoryProps(newCategory).title);
+    });
 }
